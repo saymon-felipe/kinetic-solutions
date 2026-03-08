@@ -22,7 +22,7 @@ export default function AboutFounder() {
               "Nossa visão nos move, nossa expertise te guia. Entregamos soluções dinâmicas para o ritmo 
               do seu negócio, garantindo a confiança que você precisa para ir além."
             </p>
-            <a href="https://linkedin.com/in/saymonfelipe" target="_blank" rel="noreferrer" className="btn btn-primary hover-target">
+            <a href="https://www.linkedin.com/in/saymonflima/" target="_blank" rel="noreferrer" className="btn btn-primary hover-target">
               <i className="fa-brands fa-linkedin"></i> Conectar
             </a>
           </motion.div>
