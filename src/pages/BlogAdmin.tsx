@@ -65,7 +65,7 @@ export default function BlogAdmin() {
   };
 
   const handleTitleChange = (val: string) => {
-    setPost({ ...post, titulo: val, slug: generateSlug(val) });
+    setPost(prev => ({ ...prev, titulo: val, slug: generateSlug(val) }));
   };
 
   const handleSave = async () => {
@@ -115,20 +115,37 @@ export default function BlogAdmin() {
           clearInterval(checarStatus);
 
           let rawData = jobData;
-          if (typeof rawData === 'string') {
-            rawData = rawData.replace(/```json\n?|```/g, '').trim();
+          let loopCount = 0;
+          
+          while (typeof rawData === 'string' && loopCount < 5) {
+              rawData = rawData.replace(/```json\n?|```/g, '').trim();
+              try {
+                  rawData = JSON.parse(rawData);
+              } catch(e) {
+                  console.warn("Falha no JSON.parse na iteração", loopCount, rawData);
+                  break; 
+              }
+              loopCount++;
           }
 
-          const resultObj = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
-          
-          const { titulo, meta_description, conteudo_html } = resultObj;
+          const resultObj = (typeof rawData === 'object' && rawData !== null) ? rawData : {};
+
+          const normalizedObj: any = {};
+          Object.keys(resultObj).forEach(key => {
+              const cleanKey = key.toLowerCase().trim();
+              normalizedObj[cleanKey] = resultObj[key];
+          });
+
+          const novoTitulo = normalizedObj['titulo'] || normalizedObj['title'] || '';
+          const novaDescricao = normalizedObj['descricao'] || normalizedObj['description'] || '';
+          const novoConteudo = normalizedObj['conteudo'] || normalizedObj['content'] || '';
           
           setPost(prev => ({ 
             ...prev, 
-            titulo: titulo || prev.titulo,
-            slug: titulo ? generateSlug(titulo) : prev.slug,
-            descricao: meta_description || prev.descricao, 
-            conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + (conteudo_html || '')
+            titulo: novoTitulo || prev.titulo,
+            slug: novoTitulo ? generateSlug(novoTitulo) : prev.slug,
+            descricao: novaDescricao || prev.descricao, 
+            conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + (novoConteudo || '')
           }));
           
           setPrompt('');
@@ -138,15 +155,15 @@ export default function BlogAdmin() {
         } catch (pollErr) {
           clearInterval(checarStatus);
           setLoadingIA(false);
-          console.error("Erro no polling da IA:", pollErr);
-          alert('Falha na auditoria dos dados da IA.');
+          console.error("Erro no processo de extração:", pollErr);
+          alert('Falha interna ao processar a resposta da IA.');
         }
       }, 5000);
 
     } catch (err) {
       setLoadingIA(false);
-      console.error("Erro ao iniciar processo:", err);
-      alert('Conexão com o core da KSI falhou.');
+      console.error("Erro de comunicação:", err);
+      alert('Conexão com o servidor falhou.');
     }
   };
 
@@ -214,7 +231,7 @@ export default function BlogAdmin() {
             <input 
               type="checkbox" 
               checked={post.status === 'publicado'}
-              onChange={(e) => setPost({...post, status: e.target.checked ? 'publicado' : 'rascunho'})}
+              onChange={(e) => setPost(prev => ({...prev, status: e.target.checked ? 'publicado' : 'rascunho'}))}
               style={{ width: '18px', height: '18px' }}
             />
           </label>
@@ -253,7 +270,6 @@ export default function BlogAdmin() {
           </div>
         </div>
 
-        {/* Adicionado form-flex-col-mobile para responsividade */}
         <div className="form-flex-col-mobile" style={{ display: 'flex', gap: '20px', marginTop: '32px' }}>
           <div className="form-group-blog" style={{ flex: 2 }}>
             <label style={{ color: '#71717a', fontSize: '0.8rem', fontWeight: 'bold' }}>TÍTULO DO ARTIGO</label>
@@ -272,7 +288,7 @@ export default function BlogAdmin() {
             <label style={{ color: '#71717a', fontSize: '0.8rem', fontWeight: 'bold' }}>CATEGORIA</label>
             <select 
               value={post.categoria_id}
-              onChange={(e) => setPost({...post, categoria_id: parseInt(e.target.value)})}
+              onChange={(e) => setPost(prev => ({...prev, categoria_id: parseInt(e.target.value)}))}
               style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#18181b', color: '#fff', marginTop: '8px', cursor: 'pointer' }}
             >
               <option value="" disabled>Selecione...</option>
@@ -283,7 +299,6 @@ export default function BlogAdmin() {
           </div>
         </div>
 
-        {/* Adicionado form-flex-col-mobile para responsividade */}
         <div className="form-flex-col-mobile" style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
           <div style={{ flex: 1 }}>
             <label style={{ color: '#71717a', fontSize: '0.8rem', fontWeight: 'bold' }}>VISÍVEL EM (OPCIONAL)</label>
@@ -291,7 +306,7 @@ export default function BlogAdmin() {
               type="datetime-local"
               className="blog-input"
               value={post.data_publicacao}
-              onChange={(e) => setPost({...post, data_publicacao: e.target.value})}
+              onChange={(e) => setPost(prev => ({...prev, data_publicacao: e.target.value}))}
               style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#18181b', color: '#fff', marginTop: '8px' }}
             />
           </div>
@@ -301,7 +316,7 @@ export default function BlogAdmin() {
               type="datetime-local"
               className="blog-input"
               value={post.data_pausa}
-              onChange={(e) => setPost({...post, data_pausa: e.target.value})}
+              onChange={(e) => setPost(prev => ({...prev, data_pausa: e.target.value}))}
               style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#18181b', color: '#fff', marginTop: '8px' }}
             />
           </div>
@@ -311,7 +326,7 @@ export default function BlogAdmin() {
           <label style={{ color: '#71717a', fontSize: '0.8rem', fontWeight: 'bold' }}>BREVE DESCRIÇÃO (SEO)</label>
           <textarea 
             value={post.descricao}
-            onChange={(e) => setPost({...post, descricao: e.target.value})}
+            onChange={(e) => setPost(prev => ({...prev, descricao: e.target.value}))}
             rows={2}
             style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#18181b', color: '#fff', marginTop: '8px', resize: 'vertical' }}
           />
@@ -324,7 +339,7 @@ export default function BlogAdmin() {
             modules={modules}
             style={{ height: '500px', paddingBottom: '42px' }}
             value={post.conteudo}
-            onChange={(val) => setPost({...post, conteudo: val})}
+            onChange={(val) => setPost(prev => ({...prev, conteudo: val}))}
           />
         </div>
 
