@@ -640,3 +640,14 @@
     font-size: 1.1rem;
     font-weight: 600;
 }
+
+.login-container {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & > .admin-card {
+        background: var(--bg-color);
+    }
+}
