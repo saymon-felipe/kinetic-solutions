@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import api from '../services/api';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -29,17 +30,7 @@ export default function Contact() {
     setStatus('loading');
 
     try {
-      const baseUrl = process.env.API_URL || import.meta.env.VITE_API_URL || '';
-      
-      const response = await fetch(`${baseUrl}utils/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) throw new Error();
+      await api.post('/utils/contact', formData);
       
       setStatus('success');
       setFormData({ name: '', email: '', tel: '', requestType: '', obs: '' });
