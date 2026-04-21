@@ -114,33 +114,39 @@ export default function BlogAdmin() {
 
           clearInterval(checarStatus);
 
-          const resultObj = typeof jobData === 'string' ? JSON.parse(jobData) : jobData;
-          const { titulo, descricao, conteudo } = resultObj;
+          let rawData = jobData;
+          if (typeof rawData === 'string') {
+            rawData = rawData.replace(/```json\n?|```/g, '').trim();
+          }
+
+          const resultObj = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+          
+          const { titulo, meta_description, conteudo_html } = resultObj;
           
           setPost(prev => ({ 
             ...prev, 
             titulo: titulo || prev.titulo,
             slug: titulo ? generateSlug(titulo) : prev.slug,
-            descricao: descricao || prev.descricao, 
-            conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + conteudo 
+            descricao: meta_description || prev.descricao, 
+            conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + (conteudo_html || '')
           }));
           
           setPrompt('');
           setIsPromptExpanded(false);
-          setLoadingIA(false); 
+          setLoadingIA(false);
 
         } catch (pollErr) {
           clearInterval(checarStatus);
           setLoadingIA(false);
-          console.error("Erro no background:", pollErr);
-          alert('A IA reportou uma falha durante a geração do texto.');
+          console.error("Erro no polling da IA:", pollErr);
+          alert('Falha na auditoria dos dados da IA.');
         }
-      }, 5000); 
+      }, 5000);
 
     } catch (err) {
       setLoadingIA(false);
-      console.error("Erro ao iniciar:", err);
-      alert('Falha ao comunicar com o servidor da IA.');
+      console.error("Erro ao iniciar processo:", err);
+      alert('Conexão com o core da KSI falhou.');
     }
   };
 
