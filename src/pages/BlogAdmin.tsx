@@ -96,25 +96,51 @@ export default function BlogAdmin() {
 
   const gerarComIA = async () => {
     if (!prompt) return;
+    
     setLoadingIA(true);
+    
     try {
-      const res = await api.post('/blog/ai-copywriter', { prompt });
-      const { titulo, descricao, conteudo } = JSON.parse(res.data.returnObj);
-      
-      setPost(prev => ({ 
-        ...prev, 
-        titulo: titulo || prev.titulo,
-        slug: titulo ? generateSlug(titulo) : prev.slug,
-        descricao: descricao || prev.descricao, 
-        conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + conteudo 
-      }));
-      
-      setPrompt('');
-      setIsPromptExpanded(false);
+      const startRes = await api.post('/blog/ai-copywriter', { prompt });
+      const jobId = startRes.data.returnObj.jobId;
+
+      const checarStatus = setInterval(async () => {
+        try {
+          const statusRes = await api.get(`/blog/ai-copywriter/status/${jobId}`);
+          const jobData = statusRes.data.returnObj;
+
+          if (jobData && jobData.status === 'processing') {
+            return; 
+          }
+
+          clearInterval(checarStatus);
+
+          const resultObj = typeof jobData === 'string' ? JSON.parse(jobData) : jobData;
+          const { titulo, descricao, conteudo } = resultObj;
+          
+          setPost(prev => ({ 
+            ...prev, 
+            titulo: titulo || prev.titulo,
+            slug: titulo ? generateSlug(titulo) : prev.slug,
+            descricao: descricao || prev.descricao, 
+            conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + conteudo 
+          }));
+          
+          setPrompt('');
+          setIsPromptExpanded(false);
+          setLoadingIA(false); 
+
+        } catch (pollErr) {
+          clearInterval(checarStatus);
+          setLoadingIA(false);
+          console.error("Erro no background:", pollErr);
+          alert('A IA reportou uma falha durante a geração do texto.');
+        }
+      }, 5000); 
+
     } catch (err) {
-      alert('Falha ao comunicar com a IA.');
-    } finally { 
-      setLoadingIA(false); 
+      setLoadingIA(false);
+      console.error("Erro ao iniciar:", err);
+      alert('Falha ao comunicar com o servidor da IA.');
     }
   };
 
