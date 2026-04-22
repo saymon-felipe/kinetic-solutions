@@ -41,6 +41,7 @@ export default function Header() {
       }
     },
     flow: 'auth-code',
+    scope: 'openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read'
   });
 
   const handleLogout = async () => {

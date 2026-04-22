@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -23,11 +23,19 @@ import AdminBlogCategories from './pages/admin/AdminBlogCategories';
 
 function AnalyticsTracker() {
   const location = useLocation();
+  
+  const lastTrackedPath = useRef('');
 
   useEffect(() => {
     if (location.pathname.startsWith('/admin')) {
       return;
     }
+
+    const currentPath = location.pathname + location.search;
+    if (lastTrackedPath.current === currentPath) {
+      return; 
+    }
+    lastTrackedPath.current = currentPath;
 
     let sessionId = sessionStorage.getItem('ksi_session');
     
