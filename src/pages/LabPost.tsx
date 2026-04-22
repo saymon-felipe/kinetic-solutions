@@ -34,7 +34,7 @@ export default function LabPost() {
           <span>•</span>
           <span>{new Date(post.data_publicacao).toLocaleDateString('pt-BR')}</span>
           <span>•</span>
-          <span>{post.visualizacoes} visualizações</span>
+          <span>{post.visualizacoes} {post.visualizacoes === 1 ? 'visualização' : 'visualizações'}</span>
         </div>
       </header>
 
