@@ -88,11 +88,22 @@ export default function Header() {
     transition: 'all 0.3s ease'
   };
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      window.history.pushState(null, '', '/');
+    }
+  };
+
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`} style={{ ...headerStyle, position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000 }}>
       <div className="container header-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
         
-        <Link to="/" className="logo">
+        <Link to="/" className="logo" onClick={handleLogoClick}>
           <img src="/img/ksi.png" alt="KSI Logo" style={{ width: '70px' }} />
         </Link>
         
