@@ -76,11 +76,38 @@ function HomePage() {
   );
 }
 
+function ScrollToHash() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (pathname === '/' && hash) {
+      const id = hash.replace('#', '');
+      const element = document.getElementById(id);
+
+      if (element) {
+        setTimeout(() => {
+          const headerOffset = 90;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+        }, 100);
+      }
+    }
+  }, [pathname, hash]);
+
+  return null;
+}
+
 function App() {
   return (
     <div style={{ minHeight: '100dvh' }}>
       <CustomCursor />
       <AnalyticsTracker />
+      <ScrollToHash />
       
       <Routes>
         <Route path="/*" element={

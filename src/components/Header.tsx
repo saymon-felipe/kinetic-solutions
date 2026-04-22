@@ -30,6 +30,27 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  const handleScrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (location.pathname === '/') {
+      e.preventDefault(); 
+      
+      const element = document.getElementById(id);
+      if (element) {
+        const headerOffset = 90; 
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+        
+        window.history.pushState(null, '', `/#${id}`);
+      }
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   const login = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       try {
@@ -78,9 +99,9 @@ export default function Header() {
         {/* NAVEGAÇÃO DESKTOP */}
         <nav className="desktop-nav" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
           <ul className="nav-links flex items-center gap-6">
-            <li><a href="/#servicos" className="hover-target">SERVIÇOS</a></li>
-            <li><a href="/#portfolio" className="hover-target">PORTFOLIO</a></li>
-            <li><a href="/#sobre" className="hover-target">SOBRE NÓS</a></li>
+            <li><a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')} className="hover-target">SERVIÇOS</a></li>
+            <li><a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')} className="hover-target">PORTFOLIO</a></li>
+            <li><a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')} className="hover-target">SOBRE NÓS</a></li>
             <li><Link to="/lab" className="hover-target">LAB</Link></li>
           </ul>
         </nav>
@@ -107,9 +128,9 @@ export default function Header() {
 
         {/* DROPDOWN MOBILE */}
         <div className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`}>
-          <a href="/#servicos" onClick={() => setIsMobileMenuOpen(false)}>SERVIÇOS</a>
-          <a href="/#portfolio" onClick={() => setIsMobileMenuOpen(false)}>PORTFOLIO</a>
-          <a href="/#sobre" onClick={() => setIsMobileMenuOpen(false)}>SOBRE NÓS</a>
+          <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')}>SERVIÇOS</a>
+          <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')}>PORTFOLIO</a>
+          <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')}>SOBRE NÓS</a>
           <Link to="/lab" onClick={() => setIsMobileMenuOpen(false)}>LAB</Link>
           <hr style={{ borderTop: '1px solid rgba(0,0,0,0.1)' }} />
           
