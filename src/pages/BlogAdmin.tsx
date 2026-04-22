@@ -138,7 +138,7 @@ export default function BlogAdmin() {
 
           const novoTitulo = normalizedObj['titulo'] || normalizedObj['title'] || '';
           const novaDescricao = normalizedObj['descricao'] || normalizedObj['description'] || '';
-          const novoConteudo = normalizedObj['conteudo'] || normalizedObj['content'] || '';
+          const novoConteudo = (normalizedObj['conteudo'] || normalizedObj['content'] || '').replace(/&nbsp;/g, ' ');
           
           setPost(prev => ({ 
             ...prev, 

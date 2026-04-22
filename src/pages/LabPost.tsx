@@ -17,7 +17,7 @@ export default function LabPost() {
   if (!post) return <div className="blog-container text-center">Carregando conteúdo...</div>;
 
   return (
-    <div className="container post-detail-wrapper">
+    <div className="blog-container post-detail-wrapper">
       <Helmet>
         <title>{post.titulo} | KSI LAB</title>
         <meta name="description" content={post.descricao} />
@@ -40,7 +40,7 @@ export default function LabPost() {
 
       <article 
         className="ksi-article-body"
-        dangerouslySetInnerHTML={{ __html: post.conteudo }}
+        dangerouslySetInnerHTML={{ __html: post.conteudo.replace(/&nbsp;/g, ' ') }}
       />
     </div>
   );
