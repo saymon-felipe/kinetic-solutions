@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, LogOut, List, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, LogOut, List, Menu, X, MessageSquare } from 'lucide-react';
 import api from '../../services/api';
 import '../../styles/blog.css';
 
@@ -24,7 +24,6 @@ export default function AdminLayout() {
     checkAuth();
   }, [navigate]);
 
-  // Fecha a sidebar no mobile ao clicar em um link
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
@@ -81,6 +80,10 @@ export default function AdminLayout() {
           
           <Link to="/admin/blog/categorias" className={`nav-item ${location.pathname.includes('/admin/blog/categorias') ? 'active' : ''}`}>
             <List size={20} /> Categorias
+          </Link>
+
+          <Link to="/admin/blog/interacoes" className={`nav-item ${location.pathname.includes('/admin/blog/interacoes') ? 'active' : ''}`}>
+            <MessageSquare size={20} /> Interações
           </Link>
         </nav>
 

@@ -8,19 +8,25 @@ export default function AdminLogin() {
 
   const loginAdmin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
-        await api.post('/users/google-login', { token: codeResponse.code });
-        
-        const resUser = await api.get('/users');
-        const user = resUser.data.returnObj || resUser.data;
-        console.log(resUser)
-        if (user && user.admin) {
-            navigate('/admin');
-        } else {
-        await api.get('/users/logout');
-            alert('Acesso negado. Sua conta não possui nível administrativo.');
+        try {
+            await api.post('/users/google-login', { token: codeResponse.code });
+            
+            const resUser = await api.get('/users');
+            const user = resUser.data.returnObj || resUser.data;
+            
+            if (user && user.admin) {
+                navigate('/admin');
+            } else {
+                await api.get('/users/logout');
+                alert('Acesso negado. Sua conta não possui nível administrativo.');
+            }
+        } catch (error) {
+            alert('Falha ao processar o login com o Google.');
         }
     },
     flow: 'auth-code',
+    scope: 'openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read',
+    prompt: 'consent'
   });
 
   return (

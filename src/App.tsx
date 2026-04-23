@@ -20,6 +20,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBlogDashboard from './pages/admin/AdminBlogDashboard';
 import BlogAdmin from './pages/BlogAdmin';
 import AdminBlogCategories from './pages/admin/AdminBlogCategories';
+import AdminBlogInteractions from './pages/admin/AdminBlogInteractions';
 
 function AnalyticsTracker() {
   const location = useLocation();
@@ -130,6 +131,7 @@ function App() {
           <Route path="blog/new" element={<BlogAdmin />} />
           <Route path="blog/edit/:id" element={<BlogAdmin />} />
           <Route path="blog/categorias" element={<AdminBlogCategories />} />
+          <Route path="blog/interacoes" element={<AdminBlogInteractions />} />
         </Route>
       </Routes>
     </div>

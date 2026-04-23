@@ -1,23 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
-import { Menu, X } from 'lucide-react'; 
+import { Menu, X } from 'lucide-react';
 import api from '../services/api';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchUser = () => {
     api.get('/users')
       .then(res => {
         const userData = res.data.returnObj || res.data;
-        if (userData) setUser(userData);
+        setUser(userData || null);
       })
       .catch(() => setUser(null));
+  };
+
+  useEffect(() => {
+    fetchUser(); 
+
+    window.addEventListener('authChange', fetchUser);
+    
+    return () => window.removeEventListener('authChange', fetchUser);
   }, []);
 
   useEffect(() => {
@@ -55,21 +63,23 @@ export default function Header() {
     onSuccess: async (codeResponse) => {
       try {
         await api.post('/users/google-login', { token: codeResponse.code });
-        const resUser = await api.get('/users');
-        setUser(resUser.data.returnObj || resUser.data);
+        
+        window.dispatchEvent(new Event('authChange'));
       } catch (error) {
         alert('Falha ao autenticar.');
       }
     },
     flow: 'auth-code',
-    scope: 'openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read'
+    scope: 'openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read',
+    prompt: 'consent'
   });
 
   const handleLogout = async () => {
     try {
       await api.get('/users/logout');
       googleLogout();
-      setUser(null);
+      
+      window.dispatchEvent(new Event('authChange'));
     } catch (err) {
       console.error(err);
     }
@@ -107,7 +117,6 @@ export default function Header() {
           <img src="/img/ksi.png" alt="KSI Logo" style={{ width: '70px' }} />
         </Link>
         
-        {/* NAVEGAÇÃO DESKTOP */}
         <nav className="desktop-nav" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
           <ul className="nav-links flex items-center gap-6">
             <li><a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')} className="hover-target">SERVIÇOS</a></li>
@@ -117,7 +126,6 @@ export default function Header() {
           </ul>
         </nav>
 
-        {/* USUÁRIO DESKTOP */}
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(0,0,0,0.04)', padding: '6px 16px 6px 6px', borderRadius: '40px', border: '1px solid rgba(0,0,0,0.05)' }}>
@@ -132,12 +140,10 @@ export default function Header() {
           )}
         </div>
 
-        {/* BOTÃO HAMBÚRGUER MOBILE */}
         <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X size={28} color="var(--accent-color)" /> : <Menu size={28} color="var(--accent-color)" />}
         </button>
 
-        {/* DROPDOWN MOBILE */}
         <div className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`}>
           <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')}>SERVIÇOS</a>
           <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')}>PORTFOLIO</a>
