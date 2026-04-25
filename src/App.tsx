@@ -23,6 +23,8 @@ import BlogAdmin from './pages/BlogAdmin';
 import AdminBlogCategories from './pages/admin/AdminBlogCategories';
 import AdminBlogInteractions from './pages/admin/AdminBlogInteractions';
 
+//TODO: Modularizar as funções de Analytics em hooks separados.
+
 function AnalyticsTracker() {
   const location = useLocation();
   const lastTrackedPath = useRef('');
