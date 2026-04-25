@@ -66,11 +66,13 @@ export default function useAdvancedAnalytics() {
       };
 
       if (isUnloading) {
-        const url = `${api.defaults.baseURL}/analytics/metrics`;
-        fetch(url, {
+        const formData = new URLSearchParams();
+        formData.append('data', JSON.stringify(payload));
+
+        const baseURL = api.defaults.baseURL || 'http://localhost:3000';
+        fetch(`${baseURL.replace(/\/$/, '')}/analytics/metrics`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: formData, 
           keepalive: true 
         }).catch(() => {});
       } else {
@@ -87,7 +89,9 @@ export default function useAdvancedAnalytics() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('click', handleClick, { passive: true });
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    
     window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', () => sendMetrics(true)); 
 
     return () => {
       clearInterval(heartbeat);
@@ -96,6 +100,7 @@ export default function useAdvancedAnalytics() {
       window.removeEventListener('click', handleClick);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', () => sendMetrics(true));
     };
   }, [location.pathname]);
 
