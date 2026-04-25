@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
 import SmoothScroll from './components/SmoothScroll';
 import api from './services/api';
+import useAdvancedAnalytics from './hooks/useAdvancedAnalytics';
 
 import LabHome from './pages/LabHome';
 import LabPost from './pages/LabPost';
@@ -24,8 +25,9 @@ import AdminBlogInteractions from './pages/admin/AdminBlogInteractions';
 
 function AnalyticsTracker() {
   const location = useLocation();
-  
   const lastTrackedPath = useRef('');
+
+  useAdvancedAnalytics();
 
   useEffect(() => {
     if (location.pathname.startsWith('/admin')) {
