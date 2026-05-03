@@ -161,6 +161,21 @@ export default function LabPost() {
       <Helmet>
         <title>{post.titulo} | KSI LAB</title>
         <meta name="description" content={post.descricao} />
+        {post.keywords && <meta name="keywords" content={post.keywords} />}
+
+        {/* Open Graph / Facebook / LinkedIn / WhatsApp */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={`${post.titulo} | KSI LAB`} />
+        <meta property="og:description" content={post.descricao} />
+        <meta property="og:image" content={post.imagem_capa || 'https://kineticsolutions.com.br/banner-kinetic-solutions-16-9.png'} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:site_name" content="Kinetic Solutions" />
+
+        {/* Twitter Cards */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${post.titulo} | KSI LAB`} />
+        <meta name="twitter:description" content={post.descricao} />
+        <meta name="twitter:image" content={post.imagem_capa || 'https://kineticsolutions.com.br/banner-kinetic-solutions-16-9.png'} />
       </Helmet>
 
       <Link to="/lab" className="back-link">

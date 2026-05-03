@@ -16,6 +16,7 @@ export default function BlogAdmin() {
     titulo: '', 
     slug: '', 
     descricao: '', 
+    keywords: '',
     conteudo: '', 
     status: 'rascunho', 
     categoria_id: 1, 
@@ -138,13 +139,15 @@ export default function BlogAdmin() {
 
           const novoTitulo = normalizedObj['titulo'] || normalizedObj['title'] || '';
           const novaDescricao = normalizedObj['descricao'] || normalizedObj['description'] || '';
+          const novoKeywords = normalizedObj['keywords'] || '';
           const novoConteudo = (normalizedObj['conteudo'] || normalizedObj['content'] || '').replace(/&nbsp;/g, ' ');
           
           setPost(prev => ({ 
-            ...prev, 
-            titulo: novoTitulo || prev.titulo,
+             ...prev, 
+             titulo: novoTitulo || prev.titulo,
             slug: novoTitulo ? generateSlug(novoTitulo) : prev.slug,
             descricao: novaDescricao || prev.descricao, 
+            keywords: novoKeywords || prev.keywords,
             conteudo: prev.conteudo + (prev.conteudo ? '<br/><br/>' : '') + (novoConteudo || '')
           }));
           
@@ -329,6 +332,17 @@ export default function BlogAdmin() {
             onChange={(e) => setPost(prev => ({...prev, descricao: e.target.value}))}
             rows={2}
             style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#18181b', color: '#fff', marginTop: '8px', resize: 'vertical' }}
+          />
+        </div>
+
+        <div className="form-group-blog" style={{ marginTop: '20px' }}>
+          <label style={{ color: '#71717a', fontSize: '0.8rem', fontWeight: 'bold' }}>PALAVRAS-CHAVE (SEO)</label>
+          <input 
+            className="blog-input"
+            value={post.keywords}
+            onChange={(e) => setPost(prev => ({...prev, keywords: e.target.value}))}
+            placeholder="tecnologia, desenvolvimento, inovação..."
+            style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#18181b', color: '#fff', marginTop: '8px' }}
           />
         </div>
 
