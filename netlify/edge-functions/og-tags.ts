@@ -11,7 +11,11 @@ export default async (request: Request, context: Context) => {
   const slug = match[1];
 
   try {
-    const API_URL = `${import.meta.env.VITE_API_URL}/blog/posts/${slug}`; 
+    const baseUrl = Netlify.env.get("VITE_API_URL")?.replace(/\/$/, '');
+    
+    const finalBaseUrl = baseUrl || '';
+
+    const API_URL = `${finalBaseUrl}/blog/posts/${slug}`; 
     const response = await fetch(API_URL);
     
     if (!response.ok) {
