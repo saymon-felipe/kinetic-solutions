@@ -1,2 +1,7 @@
 User-agent: *
 Allow: /
+Allow: /lab
+
+Disallow: /admin
+
+Sitemap: https://kineticsolutions.com.br/sitemap.xml
