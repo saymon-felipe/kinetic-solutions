@@ -49,6 +49,8 @@ export default async (request: Request, context: Context) => {
     newHtml = newHtml.replace(/<meta property="og:image" content=".*?">/i, `<meta property="og:image" content="${coverImage}">`);
     newHtml = newHtml.replace(/<meta property="og:url" content=".*?">/i, `<meta property="og:url" content="${url.href}">`);
 
+    newHtml = newHtml.replace(/<link rel="canonical" href=".*?">/i, `<link rel="canonical" href="${url.origin}${url.pathname}">`);
+
     newHtml = newHtml.replace(/<meta name="twitter:title" content=".*?">/i, `<meta name="twitter:title" content="${title}">`);
     newHtml = newHtml.replace(/<meta name="twitter:description" content=".*?">/i, `<meta name="twitter:description" content="${description}">`);
     newHtml = newHtml.replace(/<meta name="twitter:image" content=".*?">/i, `<meta name="twitter:image" content="${coverImage}">`);

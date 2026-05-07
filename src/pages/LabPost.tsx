@@ -160,6 +160,7 @@ export default function LabPost() {
       
       <Helmet>
         <title>{post.titulo} | KSI LAB</title>
+        <link rel="canonical" href={`https://kineticsolutions.com.br/lab/${slug}`} />
         <meta name="description" content={post.descricao} />
         {post.keywords && <meta name="keywords" content={post.keywords} />}
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Clock, User } from 'lucide-react';
 import api from '../services/api';
 import '../styles/blog.css';
@@ -30,6 +31,12 @@ export default function LabHome() {
 
   return (
     <div className="blog-container">
+      <Helmet>
+        <title>KSI LAB | Laboratório de Inovações</title>
+        <meta name="description" content="Inovações, pesquisas e o futuro do desenvolvimento." />
+        <link rel="canonical" href="https://kineticsolutions.com.br/lab" />
+      </Helmet>
+
       <div style={{ marginBottom: '48px' }}>
         <h1 className="blog-title">KSI <span className="text-blue">LAB</span></h1>
         <p className="blog-subtitle">Inovações, pesquisas e o futuro do desenvolvimento.</p>
