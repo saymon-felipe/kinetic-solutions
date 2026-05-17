@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Clock, User } from 'lucide-react';
 import api from '../services/api';
+import BlogLoader from '../components/BlogLoader';
 import '../styles/blog.css';
 
 export default function LabHome() {
@@ -37,17 +38,18 @@ export default function LabHome() {
         <link rel="canonical" href="https://kineticsolutions.com.br/lab" />
       </Helmet>
 
-      <div style={{ marginBottom: '48px' }}>
+      <div className="blog-hero-copy">
         <h1 className="blog-title">KSI <span className="text-blue">LAB</span></h1>
         <p className="blog-subtitle">Inovações, pesquisas e o futuro do desenvolvimento.</p>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px' }}>
-          Carregando artigos...
-        </div>
+        <BlogLoader
+          title="Preparando o Lab"
+          message="Estamos buscando os artigos e organizando as ideias para você."
+        />
       ) : posts.length === 0 ? (
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px', background: 'rgba(255,255,255,0.2)', borderRadius: '16px', backdropFilter: 'blur(10px)' }}>
+        <div className="blog-feedback-state blog-feedback-state--empty">
           Nenhum artigo publicado no momento. Volte em breve!
         </div>
       ) : (
@@ -60,7 +62,7 @@ export default function LabHome() {
               </div>
               
               <div className="featured-post-content">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                <div className="featured-post-meta">
                   <span className="post-category">{featuredPost.categoria_nome}</span>
                   <span className="post-meta-tag">
                     <Clock size={14} /> {formatDate(featuredPost.data_publicacao)}
@@ -72,7 +74,7 @@ export default function LabHome() {
                   {featuredPost.descricao || 'Clique para ler este artigo completo no nosso laboratório de inovações...'}
                 </p>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '24px' }}>
+                <div className="featured-post-footer">
                   <span className="post-meta-tag">
                     <User size={14} /> {featuredPost.autor_nome}
                   </span>
@@ -94,9 +96,9 @@ export default function LabHome() {
                   </div>
 
                   <div className="post-content-preview">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <div className="post-card-meta">
                       <span className="post-category">{post.categoria_nome}</span>
-                      <span className="post-meta-tag" style={{ fontSize: '0.75rem' }}>
+                      <span className="post-meta-tag">
                         {formatDate(post.data_publicacao)}
                       </span>
                     </div>
@@ -106,7 +108,7 @@ export default function LabHome() {
                       {post.descricao || 'Clique para ler este artigo completo no nosso laboratório de inovações...'}
                     </p>
                     
-                    <span className="read-more-link" style={{ marginTop: 'auto' }}>
+                    <span className="read-more-link">
                       Ler artigo <ArrowRight size={16} />
                     </span>
                   </div>

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ThumbsUp, Share2, MessageSquare, Clock, User, Eye } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import api from '../services/api';
+import BlogLoader from '../components/BlogLoader';
 import '../styles/blog.css';
 
 function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any) {
@@ -24,24 +25,24 @@ function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any)
   };
 
   return (
-    <div style={{ background: 'rgba(255,255,255,0.6)', padding: '24px', borderRadius: '16px', marginBottom: '32px', backdropFilter: 'blur(10px)', border: '1px solid var(--glass-border)' }}>
+    <div className="comment-box">
       {user ? (
-        <form onSubmit={handleComentar} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src={user.imagem} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
-            <span style={{ fontWeight: 'bold', fontFamily: 'var(--font-body)' }}>{user.nome}</span>
+        <form onSubmit={handleComentar} className="comment-form">
+          <div className="comment-user">
+            <img src={user.imagem} alt="Avatar" className="comment-avatar comment-avatar--sm" referrerPolicy="no-referrer" />
+            <span>{user.nome}</span>
           </div>
           <textarea 
             placeholder="O que você achou deste artigo?" 
             value={novoComentario}
             onChange={e => setNovoComentario(e.target.value)}
-            style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: '#fff', color: '#000', resize: 'vertical', minHeight: '100px', fontFamily: 'var(--font-body)' }}
+            className="comment-textarea"
           />
-          <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-end' }}>Publicar Comentário</button>
+          <button type="submit" className="btn btn-primary comment-submit">Publicar Comentário</button>
         </form>
       ) : (
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Faça login para participar da discussão.</p>
+        <div className="comment-login-state">
+          <p>Faça login para participar da discussão.</p>
           <button type="button" onClick={() => loginGoogle()} className="btn btn-primary">Entrar com o Google</button>
         </div>
       )}
@@ -153,7 +154,16 @@ export default function LabPost() {
     api.get(`/blog/posts/${post.id}/comentarios`).then(r => setComentarios(r.data.returnObj || r.data));
   };
 
-  if (!post) return <div className="blog-container text-center" style={{ paddingTop: '20vh' }}>Carregando artigo...</div>;
+  if (!post) {
+    return (
+      <div className="blog-container post-loading-container">
+        <BlogLoader
+          title="Abrindo o artigo"
+          message="Carregando conteúdo, imagem e interações do post."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="blog-container post-detail-wrapper">
@@ -184,22 +194,22 @@ export default function LabPost() {
       </Link>
 
       <div className="post-header-meta">
-        <span className="post-category" style={{ fontSize: '1rem', marginBottom: '16px' }}>{post.categoria_nome}</span>
-        <h1 className="blog-title" style={{ fontSize: '3rem', marginBottom: '24px', textTransform: 'none' }}>{post.titulo}</h1>
+        <span className="post-category post-category--hero">{post.categoria_nome}</span>
+        <h1 className="blog-title post-title">{post.titulo}</h1>
         
-        <div className="post-meta-info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+        <div className="post-meta-info">
           
-          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={16} /> {post.autor_nome}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={16} /> {new Date(post.data_publicacao).toLocaleDateString('pt-BR')}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Eye size={16} /> {post.visualizacoes} views</span>
+          <div className="post-byline">
+            <span><User size={16} /> {post.autor_nome}</span>
+            <span><Clock size={16} /> {new Date(post.data_publicacao).toLocaleDateString('pt-BR')}</span>
+            <span><Eye size={16} /> {post.visualizacoes} views</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={handleLike} className="btn" style={{ background: interacoes.userLiked ? '#3b82f6' : 'rgba(0,0,0,0.05)', color: interacoes.userLiked ? '#fff' : 'var(--text-primary)', border: '1px solid var(--glass-border)', padding: '8px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div className="post-action-row">
+            <button onClick={handleLike} className={`post-action-btn ${interacoes.userLiked ? 'is-active' : ''}`} aria-label="Curtir artigo">
               <ThumbsUp size={16} fill={interacoes.userLiked ? '#fff' : 'none'} /> {interacoes.likes}
             </button>
-            <button onClick={handleShare} className="btn" style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--text-primary)', border: '1px solid var(--glass-border)', padding: '8px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button onClick={handleShare} className="post-action-btn" aria-label="Compartilhar artigo">
               <Share2 size={16} /> {interacoes.compartilhamentos}
             </button>
           </div>
@@ -213,13 +223,12 @@ export default function LabPost() {
       <article 
         className="ksi-article-body" 
         dangerouslySetInnerHTML={{ __html: post.conteudo.replace(/&nbsp;/g, ' ') }} 
-        style={{ marginBottom: '64px' }}
       />
 
-      <hr style={{ borderTop: '1px solid rgba(0,0,0,0.1)', margin: '48px 0' }} />
+      <hr className="post-divider" />
 
-      <div id="comentarios">
-        <h3 style={{ fontSize: '1.5rem', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-heading)' }}>
+      <div id="comentarios" className="comments-section">
+        <h3 className="comments-title">
           <MessageSquare size={24} color="var(--accent-color)" /> Comentários ({comentarios.length})
         </h3>
 
@@ -230,21 +239,21 @@ export default function LabPost() {
           onCommentSuccess={recarregarComentarios} 
         />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="comments-list">
           {comentarios.map((c: any) => (
-            <div key={c.id} style={{ display: 'flex', gap: '16px' }}>
-              <img src={c.imagem} alt={c.nome} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} referrerPolicy="no-referrer" />
-              <div style={{ background: 'rgba(255,255,255,0.4)', padding: '16px', borderRadius: '0 16px 16px 16px', flex: 1, border: '1px solid var(--glass-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{c.nome}</span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{new Date(c.data).toLocaleDateString('pt-BR')}</span>
+            <div key={c.id} className="comment-item">
+              <img src={c.imagem} alt={c.nome} className="comment-avatar" referrerPolicy="no-referrer" />
+              <div className="comment-bubble">
+                <div className="comment-heading">
+                  <span>{c.nome}</span>
+                  <time>{new Date(c.data).toLocaleDateString('pt-BR')}</time>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5' }}>{c.comentario}</p>
+                <p>{c.comentario}</p>
               </div>
             </div>
           ))}
           {comentarios.length === 0 && (
-             <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px' }}>Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+             <p className="empty-comments">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
           )}
         </div>
       </div>
