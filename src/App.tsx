@@ -3,8 +3,9 @@ import { useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
-import AboutFounder from './components/AboutFounder';
 import Portfolio from './components/Portfolio';
+import Differentials from './components/Differentials';
+import AboutFounder from './components/AboutFounder';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
@@ -72,9 +73,10 @@ function HomePage() {
     <SmoothScroll>
       <main>
         <Hero />
-        <AboutFounder />
         <Services />
         <Portfolio />
+        <Differentials />
+        <AboutFounder />
         <Contact />
       </main>
     </SmoothScroll>

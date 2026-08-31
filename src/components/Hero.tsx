@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import OrganicSphere from './OrganicSphere';
 
 export default function Hero() {
-  /* Adicionado: Controle de estado e ciclo de vida para a alternância de texto */
   const [textIndex, setTextIndex] = useState(0);
   const titles = ["KINETIC SOLUTIONS.", "DIGITAL CONCEPTS."];
 
@@ -12,7 +11,7 @@ export default function Hero() {
       setTextIndex((prev) => (prev + 1) % titles.length);
     }, 3500);
     return () => clearInterval(interval);
-  }, []);
+  }, [titles.length]);
 
   return (
     <section className="section" id="home" style={{ position: 'relative', overflow: 'hidden' }}>

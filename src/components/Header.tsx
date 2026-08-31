@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, type MouseEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ArrowRight, MessageSquare, LogIn, LogOut, User } from 'lucide-react';
 import api from '../services/api';
 
 export default function Header() {
@@ -22,9 +22,7 @@ export default function Header() {
 
   useEffect(() => {
     fetchUser(); 
-
     window.addEventListener('authChange', fetchUser);
-    
     return () => window.removeEventListener('authChange', fetchUser);
   }, []);
 
@@ -44,7 +42,7 @@ export default function Header() {
       
       const element = document.getElementById(id);
       if (element) {
-        const headerOffset = 90; 
+        const headerOffset = 80; 
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
@@ -63,7 +61,6 @@ export default function Header() {
     onSuccess: async (codeResponse) => {
       try {
         await api.post('/users/google-login', { token: codeResponse.code });
-        
         window.dispatchEvent(new Event('authChange'));
       } catch (error) {
         alert('Falha ao autenticar.');
@@ -78,24 +75,10 @@ export default function Header() {
     try {
       await api.get('/users/logout');
       googleLogout();
-      
       window.dispatchEvent(new Event('authChange'));
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const headerStyle: React.CSSProperties = scrolled || isMobileMenuOpen ? {
-    background: 'rgba(255, 255, 255, 0.7)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.05)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
-    transition: 'all 0.3s ease'
-  } : {
-    background: 'transparent',
-    borderBottom: '1px solid transparent',
-    transition: 'all 0.3s ease'
   };
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -110,57 +93,131 @@ export default function Header() {
   };
 
   return (
-    <header className={`header ${scrolled ? 'scrolled' : ''}`} style={{ ...headerStyle, position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000 }}>
-      <div className="container header-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+    <header className={`header ${scrolled ? 'scrolled' : ''}`}>
+      <div className="container header-content">
         
+        {/* Logo KSI */}
         <Link to="/" className="logo" onClick={handleLogoClick}>
-          <img src="/img/ksi.png" alt="KSI Logo" style={{ width: '70px' }} />
+          <img src="/img/ksi.png" alt="KSI" className="logo-img" style={{ width: '70px', height: 'auto' }} />
         </Link>
         
-        <nav className="desktop-nav" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-          <ul className="nav-links flex items-center gap-6">
-            <li><a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')} className="hover-target">SERVIÇOS</a></li>
-            <li><a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')} className="hover-target">PORTFOLIO</a></li>
-            <li><a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')} className="hover-target">SOBRE NÓS</a></li>
-            <li><Link to="/lab" className="hover-target">LAB</Link></li>
+        {/* Navegação Desktop */}
+        <nav className="desktop-nav">
+          <ul className="nav-links">
+            <li>
+              <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')} className="hover-target">
+                SERVIÇOS
+              </a>
+            </li>
+            <li>
+              <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')} className="hover-target">
+                PORTFÓLIO
+              </a>
+            </li>
+            <li>
+              <a href="/#diferenciais" onClick={(e) => handleScrollToSection(e, 'diferenciais')} className="hover-target">
+                DIFERENCIAIS
+              </a>
+            </li>
+            <li>
+              <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')} className="hover-target">
+                SOBRE
+              </a>
+            </li>
+            <li>
+              <Link to="/lab" className="hover-target lab-nav-link">
+                LAB
+                <span className="lab-badge">NOVO</span>
+              </Link>
+            </li>
           </ul>
         </nav>
 
-        <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Ações Desktop: Login / Usuário & Botão Orçamento */}
+        <div className="header-actions">
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(0,0,0,0.04)', padding: '6px 16px 6px 6px', borderRadius: '40px', border: '1px solid rgba(0,0,0,0.05)' }}>
-              <img src={user.imagem || '/default-user-image.png'} alt="Perfil" referrerPolicy="no-referrer" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', lineHeight: '1', color: 'var(--text-primary)' }}>{user.nome?.split(' ')[0]}</span>
-                <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', textAlign: 'left', cursor: 'pointer', padding: 0, marginTop: '2px' }}>Sair</button>
+            <div className="user-profile-pill">
+              <img 
+                src={user.imagem || '/default-user-image.png'} 
+                alt="Perfil" 
+                referrerPolicy="no-referrer" 
+                className="user-avatar"
+              />
+              <div className="user-info-text">
+                <span className="user-name">{user.nome?.split(' ')[0]}</span>
+                <button onClick={handleLogout} className="logout-btn">
+                  Sair
+                </button>
               </div>
             </div>
           ) : (
-            <button onClick={() => login()} className="btn" style={{ background: '#0a0a0a', color: '#fff', padding: '8px 16px', borderRadius: '24px', fontWeight: 'bold' }}>Entrar</button>
+            <button onClick={() => login()} className="header-login-btn hover-target" title="Fazer Login">
+              <LogIn size={15} />
+              <span>Entrar</span>
+            </button>
           )}
+
+          <a 
+            href="/#contato" 
+            onClick={(e) => handleScrollToSection(e, 'contato')} 
+            className="btn btn-primary header-cta-btn hover-target"
+          >
+            <span>Orçamento</span>
+            <ArrowRight size={14} />
+          </a>
+
+          {/* Botão Menu Mobile */}
+          <button 
+            className="mobile-menu-btn hover-target" 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Fechar Menu' : 'Abrir Menu'}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
-        <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          {isMobileMenuOpen ? <X size={28} color="var(--accent-color)" /> : <Menu size={28} color="var(--accent-color)" />}
-        </button>
+      </div>
 
-        <div className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`}>
-          <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')}>SERVIÇOS</a>
-          <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')}>PORTFOLIO</a>
-          <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')}>SOBRE NÓS</a>
-          <Link to="/lab" onClick={() => setIsMobileMenuOpen(false)}>LAB</Link>
-          <hr style={{ borderTop: '1px solid rgba(0,0,0,0.1)' }} />
-          
+      {/* Menu Mobile Drawer */}
+      <div className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`}>
+        <div className="mobile-nav-links">
+          <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')}>
+            SERVIÇOS
+          </a>
+          <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')}>
+            PORTFÓLIO
+          </a>
+          <a href="/#diferenciais" onClick={(e) => handleScrollToSection(e, 'diferenciais')}>
+            DIFERENCIAIS
+          </a>
+          <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')}>
+            SOBRE NÓS
+          </a>
+          <Link to="/lab" onClick={() => setIsMobileMenuOpen(false)}>
+            LAB <span className="lab-badge">NOVO</span>
+          </Link>
+          <a href="/#contato" onClick={(e) => handleScrollToSection(e, 'contato')} className="mobile-cta-link">
+            SOLICITAR ORÇAMENTO
+          </a>
+        </div>
+
+        <div className="mobile-user-area">
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src={user.imagem || '/default-user-image.png'} alt="Perfil" referrerPolicy="no-referrer" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{user.nome}</span>
-                <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.9rem', textAlign: 'left', cursor: 'pointer', padding: 0, marginTop: '4px' }}>Sair da conta</button>
+            <div className="mobile-user-card">
+              <img src={user.imagem || '/default-user-image.png'} alt="Perfil" referrerPolicy="no-referrer" />
+              <div className="mobile-user-details">
+                <span className="mobile-user-name">{user.nome}</span>
+                <button onClick={handleLogout} className="mobile-logout-btn">
+                  <LogOut size={14} />
+                  <span>Sair da conta</span>
+                </button>
               </div>
             </div>
           ) : (
-            <button onClick={() => login()} className="btn" style={{ background: '#0a0a0a', color: '#fff', padding: '12px 16px', borderRadius: '8px', fontWeight: 'bold', width: '100%' }}>Fazer Login</button>
+            <button onClick={() => login()} className="btn btn-primary mobile-login-btn">
+              <LogIn size={16} />
+              <span>Fazer Login com Google</span>
+            </button>
           )}
         </div>
       </div>
