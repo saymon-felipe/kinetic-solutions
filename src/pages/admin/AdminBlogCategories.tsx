@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Plus, Trash2, Tag, List, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
+import KsiLoader from '../../components/KsiLoader';
 
 export default function AdminBlogCategories() {
   const [categorias, setCategorias] = useState<any[]>([]);
@@ -124,53 +125,63 @@ export default function AdminBlogCategories() {
 
       {/* TABELA DE CATEGORIAS */}
       <div className="admin-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="table-responsive">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th style={{ paddingLeft: '24px', width: '80px' }}>ID</th>
-                <th>Nome da Categoria</th>
-                <th>Identificador (Slug)</th>
-                <th style={{ textAlign: 'right', paddingRight: '24px' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categorias.map((cat: any) => (
-                <tr key={cat.id}>
-                  <td style={{ paddingLeft: '24px', color: 'var(--admin-text-dim)', fontWeight: 800 }}>
-                    #{cat.id}
-                  </td>
-                  <td>
-                    <span className="category-badge" style={{ fontSize: '0.82rem', padding: '6px 14px' }}>
-                      {cat.nome}
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--admin-text-muted)', fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                    /{cat.slug}
-                  </td>
-                  <td style={{ textAlign: 'right', paddingRight: '24px' }}>
-                    <button 
-                      onClick={() => deletarCategoria(cat.id, cat.nome)} 
-                      className="action-icon-btn delete" 
-                      title="Excluir Categoria"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {categorias.length === 0 && !loading && (
+        {loading ? (
+          <KsiLoader
+            kicker="CATEGORIAS"
+            title="Carregando Categorias"
+            message="Buscando taxonomia e estrutura de tópicos..."
+            theme="dark"
+            minHeight="280px"
+          />
+        ) : (
+          <div className="table-responsive">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--admin-text-dim)' }}>
-                    <Layers size={36} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                    <p style={{ margin: 0, fontSize: '0.95rem' }}>Nenhuma categoria cadastrada ainda.</p>
-                  </td>
+                  <th style={{ paddingLeft: '24px', width: '80px' }}>ID</th>
+                  <th>Nome da Categoria</th>
+                  <th>Identificador (Slug)</th>
+                  <th style={{ textAlign: 'right', paddingRight: '24px' }}>Ações</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {categorias.map((cat: any) => (
+                  <tr key={cat.id}>
+                    <td style={{ paddingLeft: '24px', color: 'var(--admin-text-dim)', fontWeight: 800 }}>
+                      #{cat.id}
+                    </td>
+                    <td>
+                      <span className="category-badge" style={{ fontSize: '0.82rem', padding: '6px 14px' }}>
+                        {cat.nome}
+                      </span>
+                    </td>
+                    <td style={{ color: 'var(--admin-text-muted)', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                      /{cat.slug}
+                    </td>
+                    <td style={{ textAlign: 'right', paddingRight: '24px' }}>
+                      <button 
+                        onClick={() => deletarCategoria(cat.id, cat.nome)} 
+                        className="action-icon-btn delete" 
+                        title="Excluir Categoria"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+
+                {categorias.length === 0 && (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--admin-text-dim)' }}>
+                      <Layers size={36} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                      <p style={{ margin: 0, fontSize: '0.95rem' }}>Nenhuma categoria cadastrada ainda.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

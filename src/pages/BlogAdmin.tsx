@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
+import KsiLoader from '../components/KsiLoader';
 import '../styles/admin.css';
 
 export default function BlogAdmin() {
@@ -31,6 +32,7 @@ export default function BlogAdmin() {
   const [categorias, setCategorias] = useState<any[]>([]);
   const [prompt, setPrompt] = useState('');
   const [loadingIA, setLoadingIA] = useState(false);
+  const [loadingPost, setLoadingPost] = useState(Boolean(id));
   const [iaStep, setIaStep] = useState('');
   const [saving, setSaving] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState(false);
@@ -47,6 +49,7 @@ export default function BlogAdmin() {
       .catch(err => console.error("Erro ao buscar categorias:", err));
 
     if (id) {
+      setLoadingPost(true);
       api.get(`/blog/posts/id/${id}`).then(res => {
         const data = res.data.returnObj || res.data;
         const formatForInput = (d: string) => d ? new Date(d).toISOString().slice(0, 16) : '';
@@ -55,9 +58,14 @@ export default function BlogAdmin() {
           data_publicacao: formatForInput(data.data_publicacao),
           data_pausa: formatForInput(data.data_pausa)
         });
+      }).catch(() => {
+        alert('Artigo não encontrado.');
+        navigate('/admin/blog');
+      }).finally(() => {
+        setLoadingPost(false);
       });
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const generateSlug = (text: string) => {
     return text.toString().toLowerCase()
@@ -234,6 +242,18 @@ export default function BlogAdmin() {
       handlers: { image: imageHandler }
     }
   }), [imageHandler]);
+
+  if (loadingPost) {
+    return (
+      <KsiLoader
+        kicker="KSI LAB"
+        title="Carregando Artigo"
+        message="Buscando conteúdo, tags e configurações da publicação..."
+        theme="dark"
+        minHeight="60vh"
+      />
+    );
+  }
 
   return (
     <div>

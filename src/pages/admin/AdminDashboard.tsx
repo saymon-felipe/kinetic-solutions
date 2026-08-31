@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
+import KsiLoader from '../../components/KsiLoader';
 
 export default function AdminDashboard() {
   const [periodo, setPeriodo] = useState('mes');
@@ -36,10 +37,13 @@ export default function AdminDashboard() {
 
   if (loading && !stats) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '16px' }}>
-        <div style={{ width: '40px', height: '40px', border: '3px solid rgba(56, 189, 248, 0.2)', borderTopColor: 'var(--admin-accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-        <p style={{ color: 'var(--admin-text-muted)', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>Carregando dados do servidor...</p>
-      </div>
+      <KsiLoader
+        kicker="KSI WORKSPACE"
+        title="Carregando Analytics"
+        message="Sincronizando estatísticas de audiência, timeline e métricas em tempo real..."
+        theme="dark"
+        minHeight="60vh"
+      />
     );
   }
 

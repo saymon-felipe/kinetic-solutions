@@ -808,3 +808,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* KSI LOADER ADMIN ADAPTATION */
+.admin-wrapper .ksi-loader-disc,
+.admin-card .ksi-loader-disc {
+  background: #ffffff !important;
+  border-radius: 50% !important;
+  width: 66px !important;
+  height: 66px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 10px rgba(56, 189, 248, 0.3) !important;
+  border: 2px solid rgba(255, 255, 255, 0.85) !important;
+  padding: 8px !important;
+}
+
+.admin-wrapper .ksi-loader-logo,
+.admin-card .ksi-loader-logo {
+  width: 44px !important;
+  max-width: 44px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+

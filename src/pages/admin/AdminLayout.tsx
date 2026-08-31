@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, LogOut, List, Menu, X, MessageSquare, ExternalLink, ShieldCheck, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, FileText, LogOut, List, Menu, X, MessageSquare, ExternalLink, ShieldCheck, ChevronRight, FolderKanban } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
+import KsiLoader from '../../components/KsiLoader';
 import '../../styles/admin.css';
 
 export default function AdminLayout() {
@@ -51,18 +52,22 @@ export default function AdminLayout() {
     if (p.startsWith('/admin/blog/categorias')) return 'Categorias';
     if (p.startsWith('/admin/blog/interacoes')) return 'Moderação de Comentários';
     if (p.startsWith('/admin/blog')) return 'Gestão do KSI Lab';
+    if (p.startsWith('/admin/projetos/novo')) return 'Novo Projeto';
+    if (p.startsWith('/admin/projetos/editar')) return 'Editar Projeto';
+    if (p.startsWith('/admin/projetos')) return 'Gestão de Projetos';
     return 'Painel Geral';
   };
 
   if (loading) {
     return (
       <div className="admin-wrapper" style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ textAlign: 'center', color: 'var(--admin-text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-          <div style={{ background: '#ffffff', padding: '10px 20px', borderRadius: '14px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)' }}>
-            <img src="/img/ksi.png" alt="KSI Logo" style={{ height: '32px', width: 'auto', display: 'block' }} />
-          </div>
-          <p style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', letterSpacing: '1px' }}>Sincronizando permissões de administrador...</p>
-        </div>
+        <KsiLoader
+          kicker="KSI WORKSPACE"
+          title="Autenticando"
+          message="Sincronizando permissões de administrador..."
+          theme="dark"
+          minHeight="60vh"
+        />
       </div>
     );
   }
@@ -125,6 +130,10 @@ export default function AdminLayout() {
 
           <Link to="/admin/blog/interacoes" className={`nav-item ${location.pathname.includes('/admin/blog/interacoes') ? 'active' : ''}`}>
             <MessageSquare size={18} /> Moderação
+          </Link>
+
+          <Link to="/admin/projetos" className={`nav-item ${location.pathname.startsWith('/admin/projetos') ? 'active' : ''}`}>
+            <FolderKanban size={18} /> Projetos
           </Link>
         </nav>
 

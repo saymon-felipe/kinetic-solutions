@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Lock, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
+import KsiLoader from '../../components/KsiLoader';
 import '../../styles/admin.css';
 
 export default function AdminLogin() {
@@ -42,6 +43,16 @@ export default function AdminLogin() {
   return (
     <div className="admin-wrapper" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '24px' }}>
       <div className="admin-ambient-glow" />
+
+      {loading && (
+        <KsiLoader
+          kicker="AUTENTICAÇÃO"
+          title="Acessando Workspace"
+          message="Validando credenciais de administrador..."
+          theme="dark"
+          fullScreen
+        />
+      )}
 
       <motion.div 
         className="admin-card text-center" 
