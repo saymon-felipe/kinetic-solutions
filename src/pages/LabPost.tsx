@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ThumbsUp, Share2, MessageSquare, Clock, User, Eye } from 'lucide-react';
+import { ArrowLeft, ThumbsUp, Share2, MessageSquare, Clock, User, Eye, Check, Bookmark, Sparkles } from 'lucide-react';
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { useGoogleLogin } from '@react-oauth/google';
 import api from '../services/api';
 import BlogLoader from '../components/BlogLoader';
@@ -9,18 +10,22 @@ import '../styles/blog.css';
 
 function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any) {
   const [novoComentario, setNovoComentario] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleComentar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return loginGoogle();
     if (!novoComentario.trim()) return;
 
+    setSubmitting(true);
     try {
       await api.post(`/blog/posts/${postId}/comentarios`, { comentario: novoComentario });
       setNovoComentario('');
       onCommentSuccess(); 
     } catch (e) { 
       alert("Erro ao publicar comentário."); 
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -30,20 +35,29 @@ function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any)
         <form onSubmit={handleComentar} className="comment-form">
           <div className="comment-user">
             <img src={user.imagem} alt="Avatar" className="comment-avatar comment-avatar--sm" referrerPolicy="no-referrer" />
-            <span>{user.nome}</span>
+            <div>
+              <span style={{ display: 'block', color: 'var(--text-primary)', fontWeight: 700 }}>{user.nome}</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Participando como leitor credenciado</span>
+            </div>
           </div>
           <textarea 
-            placeholder="O que você achou deste artigo?" 
+            placeholder="Compartilhe seus insights, dúvidas ou considerações sobre este artigo..." 
             value={novoComentario}
             onChange={e => setNovoComentario(e.target.value)}
             className="comment-textarea"
+            rows={3}
           />
-          <button type="submit" className="btn btn-primary comment-submit">Publicar Comentário</button>
+          <button type="submit" disabled={submitting || !novoComentario.trim()} className="btn btn-primary comment-submit">
+            {submitting ? 'Publicando...' : 'Publicar Comentário'}
+          </button>
         </form>
       ) : (
         <div className="comment-login-state">
-          <p>Faça login para participar da discussão.</p>
-          <button type="button" onClick={() => loginGoogle()} className="btn btn-primary">Entrar com o Google</button>
+          <h4 style={{ fontSize: '1.1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>Participe da Conversa</h4>
+          <p style={{ margin: '0 0 16px 0' }}>Faça login com sua conta Google para comentar e interagir com o autor e a comunidade.</p>
+          <button type="button" onClick={() => loginGoogle()} className="btn btn-primary">
+            Entrar com o Google
+          </button>
         </div>
       )}
     </div>
@@ -56,6 +70,15 @@ export default function LabPost() {
   const [interacoes, setInteracoes] = useState({ likes: 0, compartilhamentos: 0, userLiked: false });
   const [comentarios, setComentarios] = useState([]);
   const [user, setUser] = useState<any>(null);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Framer Motion Scroll Progress Indicator
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   const fetchUser = () => {
     api.get('/users')
@@ -84,16 +107,21 @@ export default function LabPost() {
 
   useEffect(() => {
     if (post) {
-       api.get(`/blog/posts/${post.id}/interacoes`).then(r => setInteracoes(r.data.returnObj || r.data));
+      api.get(`/blog/posts/${post.id}/interacoes`).then(r => setInteracoes(r.data.returnObj || r.data));
     }
   }, [user, post]);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
 
   const loginGoogle = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       try {
         await api.post('/users/google-login', { token: codeResponse.code });
-        
         window.dispatchEvent(new Event('authChange'));
+        showToast('Login realizado com sucesso!');
       } catch (error) {
         alert('Erro ao fazer login.');
       }
@@ -111,9 +139,13 @@ export default function LabPost() {
       
       setInteracoes(prev => ({
         ...prev,
-        likes: status === 'adicionado' ? prev.likes + 1 : prev.likes - 1,
+        likes: status === 'adicionado' ? prev.likes + 1 : Math.max(0, prev.likes - 1),
         userLiked: status === 'adicionado'
       }));
+
+      if (status === 'adicionado') {
+        showToast('Obrigado pelo seu feedback!');
+      }
     } catch (e) { 
       alert("Erro ao processar like."); 
     }
@@ -129,17 +161,15 @@ export default function LabPost() {
           text: post.descricao, 
           url: url 
         });
-        
         registrarCompartilhamento();
-
       } catch (error: any) {
         if (error.name !== 'AbortError') {
-          console.error("Erro no compartilhamento nativo:", error);
+          console.error("Erro no compartilhamento:", error);
         }
       }
     } else {
       navigator.clipboard.writeText(url);
-      alert('Link copiado para a área de transferência!');
+      showToast('Link copiado para a área de transferência!');
       registrarCompartilhamento();
     }
   };
@@ -152,6 +182,15 @@ export default function LabPost() {
 
   const recarregarComentarios = () => {
     api.get(`/blog/posts/${post.id}/comentarios`).then(r => setComentarios(r.data.returnObj || r.data));
+    showToast('Comentário enviado!');
+  };
+
+  const calculateReadTime = (content: string) => {
+    if (!content) return '3 min';
+    const text = content.replace(/<[^>]*>/g, '');
+    const words = text.trim().split(/\s+/).length;
+    const minutes = Math.ceil(words / 200);
+    return `${minutes || 2} min de leitura`;
   };
 
   if (!post) {
@@ -166,98 +205,125 @@ export default function LabPost() {
   }
 
   return (
-    <div className="blog-container post-detail-wrapper">
-      
-      <Helmet>
-        <title>{post.titulo} | KSI LAB</title>
-        <link rel="canonical" href={`https://kineticsolutions.com.br/lab/${slug}`} />
-        <meta name="description" content={post.descricao} />
-        {post.keywords && <meta name="keywords" content={post.keywords} />}
+    <>
+      {/* BARRA DE PROGRESSO DE LEITURA (TOPO) */}
+      <motion.div className="reading-progress-bar" style={{ scaleX }} />
 
-        {/* Open Graph / Facebook / LinkedIn / WhatsApp */}
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={`${post.titulo} | KSI LAB`} />
-        <meta property="og:description" content={post.descricao} />
-        <meta property="og:image" content={post.imagem_capa || 'https://kineticsolutions.com.br/banner-kinetic-solutions-16-9.png'} />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:site_name" content="Kinetic Solutions" />
+      {/* TOAST DE FEEDBACK */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div 
+            className="ksi-toast"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+          >
+            <Check size={18} color="#10b981" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Twitter Cards */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${post.titulo} | KSI LAB`} />
-        <meta name="twitter:description" content={post.descricao} />
-        <meta name="twitter:image" content={post.imagem_capa || 'https://kineticsolutions.com.br/banner-kinetic-solutions-16-9.png'} />
-      </Helmet>
+      <div className="blog-container post-detail-wrapper">
+        <Helmet>
+          <title>{post.titulo} | KSI LAB</title>
+          <link rel="canonical" href={`https://kineticsolutions.com.br/lab/${slug}`} />
+          <meta name="description" content={post.descricao} />
+          {post.keywords && <meta name="keywords" content={post.keywords} />}
 
-      <Link to="/lab" className="back-link">
-        <ArrowLeft size={16} /> Voltar para o Lab
-      </Link>
+          {/* Open Graph */}
+          <meta property="og:type" content="article" />
+          <meta property="og:title" content={`${post.titulo} | KSI LAB`} />
+          <meta property="og:description" content={post.descricao} />
+          <meta property="og:image" content={post.imagem_capa || 'https://kineticsolutions.com.br/banner-kinetic-solutions-16-9.png'} />
+          <meta property="og:url" content={window.location.href} />
+          <meta property="og:site_name" content="Kinetic Solutions" />
 
-      <div className="post-header-meta">
-        <span className="post-category post-category--hero">{post.categoria_nome}</span>
-        <h1 className="blog-title post-title">{post.titulo}</h1>
-        
-        <div className="post-meta-info">
+          {/* Twitter Cards */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${post.titulo} | KSI LAB`} />
+          <meta name="twitter:description" content={post.descricao} />
+          <meta name="twitter:image" content={post.imagem_capa || 'https://kineticsolutions.com.br/banner-kinetic-solutions-16-9.png'} />
+        </Helmet>
+
+        <Link to="/lab" className="back-link">
+          <ArrowLeft size={16} /> Voltar para o Lab
+        </Link>
+
+        <header className="post-header-meta">
+          <span className="post-category post-category--hero">{post.categoria_nome || 'Inovação'}</span>
+          <h1 className="blog-title post-title">{post.titulo}</h1>
           
-          <div className="post-byline">
-            <span><User size={16} /> {post.autor_nome}</span>
-            <span><Clock size={16} /> {new Date(post.data_publicacao).toLocaleDateString('pt-BR')}</span>
-            <span><Eye size={16} /> {post.visualizacoes} views</span>
+          <div className="post-meta-info">
+            <div className="post-byline">
+              <span><User size={16} /> {post.autor_nome || 'Equipe KSI'}</span>
+              <span><Clock size={16} /> {new Date(post.data_publicacao).toLocaleDateString('pt-BR')} • {calculateReadTime(post.conteudo)}</span>
+              <span><Eye size={16} /> {post.visualizacoes || 0} visualizações</span>
+            </div>
+
+            <div className="post-action-row">
+              <button 
+                onClick={handleLike} 
+                className={`post-action-btn ${interacoes.userLiked ? 'is-active' : ''}`} 
+                aria-label="Curtir artigo"
+              >
+                <ThumbsUp size={16} fill={interacoes.userLiked ? '#fff' : 'none'} /> {interacoes.likes}
+              </button>
+              <button 
+                onClick={handleShare} 
+                className="post-action-btn" 
+                aria-label="Compartilhar artigo"
+              >
+                <Share2 size={16} /> Compartilhar
+              </button>
+            </div>
           </div>
+        </header>
 
-          <div className="post-action-row">
-            <button onClick={handleLike} className={`post-action-btn ${interacoes.userLiked ? 'is-active' : ''}`} aria-label="Curtir artigo">
-              <ThumbsUp size={16} fill={interacoes.userLiked ? '#fff' : 'none'} /> {interacoes.likes}
-            </button>
-            <button onClick={handleShare} className="post-action-btn" aria-label="Compartilhar artigo">
-              <Share2 size={16} /> {interacoes.compartilhamentos}
-            </button>
-          </div>
-        </div>
-      </div>
+        {post.imagem_capa && (
+          <img src={post.imagem_capa} alt={post.titulo} className="main-post-image" />
+        )}
 
-      {post.imagem_capa && (
-        <img src={post.imagem_capa} alt={post.titulo} className="main-post-image" />
-      )}
-
-      <article 
-        className="ksi-article-body" 
-        dangerouslySetInnerHTML={{ __html: post.conteudo.replace(/&nbsp;/g, ' ') }} 
-      />
-
-      <hr className="post-divider" />
-
-      <div id="comentarios" className="comments-section">
-        <h3 className="comments-title">
-          <MessageSquare size={24} color="var(--accent-color)" /> Comentários ({comentarios.length})
-        </h3>
-
-        <CaixaDeComentario 
-          user={user} 
-          postId={post.id} 
-          loginGoogle={loginGoogle} 
-          onCommentSuccess={recarregarComentarios} 
+        <article 
+          className="ksi-article-body" 
+          dangerouslySetInnerHTML={{ __html: post.conteudo.replace(/&nbsp;/g, ' ') }} 
         />
 
-        <div className="comments-list">
-          {comentarios.map((c: any) => (
-            <div key={c.id} className="comment-item">
-              <img src={c.imagem} alt={c.nome} className="comment-avatar" referrerPolicy="no-referrer" />
-              <div className="comment-bubble">
-                <div className="comment-heading">
-                  <span>{c.nome}</span>
-                  <time>{new Date(c.data).toLocaleDateString('pt-BR')}</time>
-                </div>
-                <p>{c.comentario}</p>
-              </div>
-            </div>
-          ))}
-          {comentarios.length === 0 && (
-             <p className="empty-comments">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
-          )}
-        </div>
-      </div>
+        <hr className="post-divider" />
 
-    </div>
+        {/* SEÇÃO DE COMENTÁRIOS */}
+        <section id="comentarios" className="comments-section">
+          <h3 className="comments-title">
+            <MessageSquare size={24} color="var(--accent-color)" /> Comentários ({comentarios.length})
+          </h3>
+
+          <CaixaDeComentario 
+            user={user} 
+            postId={post.id} 
+            loginGoogle={loginGoogle} 
+            onCommentSuccess={recarregarComentarios} 
+          />
+
+          <div className="comments-list">
+            {comentarios.map((c: any) => (
+              <div key={c.id} className="comment-item">
+                <img src={c.imagem} alt={c.nome} className="comment-avatar" referrerPolicy="no-referrer" />
+                <div className="comment-bubble">
+                  <div className="comment-heading">
+                    <span>{c.nome}</span>
+                    <time>{new Date(c.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</time>
+                  </div>
+                  <p>{c.comentario}</p>
+                </div>
+              </div>
+            ))}
+            {comentarios.length === 0 && (
+              <p className="empty-comments">Nenhum comentário publicado ainda. Seja o primeiro a iniciar a discussão!</p>
+            )}
+          </div>
+        </section>
+
+      </div>
+    </>
   );
 }

@@ -1339,3 +1339,153 @@
         animation: none;
     }
 }
+
+/* ==============================================================
+   NOVAS FUNCIONALIDADES DO KSI LAB (HIGH-TECH GLASS)
+============================================================== */
+
+/* Reading Progress Bar (Top) */
+.reading-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-color) 0%, #38bdf8 50%, #818cf8 100%);
+    z-index: 10000;
+    transform-origin: 0%;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+/* Category Filter Bar */
+.category-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.category-filter-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.category-pill {
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--blog-surface);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.category-pill:hover {
+    background: var(--blog-surface-strong);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    border-color: rgba(0, 64, 128, 0.3);
+}
+
+.category-pill.active {
+    background: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 16px rgba(0, 64, 128, 0.25);
+}
+
+/* Lab Search Bar */
+.lab-search-container {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.lab-search-input {
+    width: 100%;
+    padding: 12px 18px 12px 42px;
+    border-radius: 999px;
+    background: var(--blog-surface);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+}
+
+.lab-search-input:focus {
+    background: var(--blog-surface-strong);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.12);
+}
+
+.lab-search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* Toast Notifications */
+.ksi-toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 14px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+/* Floating Action Dock */
+.post-action-dock {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 999px;
+    box-shadow: 0 12px 35px rgba(0, 64, 128, 0.14);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.post-action-dock .post-action-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+

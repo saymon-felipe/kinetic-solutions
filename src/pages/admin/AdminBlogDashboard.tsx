@@ -1,24 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, ThumbsUp, MessageSquare, Share2, Search, ExternalLink, Sparkles, Filter, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 
 export default function AdminBlogDashboard() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos');
   const navigate = useNavigate();
 
   const loadPosts = () => {
+    setLoading(true);
     api.get('/blog/admin/posts')
       .then(res => setPosts(res.data.returnObj || res.data))
-      .catch(err => console.error(err));
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadPosts();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Deseja realmente excluir este artigo?")) return;
+  const handleDelete = async (id: number, title: string) => {
+    if (!window.confirm(`Deseja realmente excluir o artigo "${title}"? Esta ação não pode ser desfeita.`)) return;
     try {
       await api.delete(`/blog/posts/${id}`);
       loadPosts();
@@ -27,84 +33,190 @@ export default function AdminBlogDashboard() {
     }
   };
 
+  const filteredPosts = useMemo(() => {
+    return posts.filter(post => {
+      const matchSearch = post.titulo?.toLowerCase().includes(search.toLowerCase()) || 
+                          post.categoria_nome?.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === 'todos' || post.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [posts, search, statusFilter]);
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+      {/* CABEÇALHO DA GESTÃO DE ARTIGOS */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
         <div>
-          <h1 className="blog-title" style={{ fontSize: '2.5rem' }}>Gestão do LAB</h1>
-          <p className="blog-subtitle">Gerencie seus artigos e acompanhe o engajamento.</p>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 900, letterSpacing: '0.5px', color: '#fff', margin: 0 }}>
+            KSI LAB <span style={{ color: 'var(--admin-accent)' }}>Artigos</span>
+          </h1>
+          <p style={{ color: 'var(--admin-text-muted)', fontSize: '0.92rem', marginTop: '6px', margin: 0 }}>
+            Gerencie publicações, acompanhe métricas de audiência e crie conteúdos com IA.
+          </p>
         </div>
-        <Link to="/admin/blog/new" className="btn btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <Plus size={20} /> Novo Artigo
+
+        <Link to="/admin/blog/new" className="btn btn-primary" style={{ display: 'inline-flex', gap: '10px', alignItems: 'center', padding: '12px 24px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', boxShadow: '0 4px 20px rgba(56, 189, 248, 0.3)', border: 'none' }}>
+          <Plus size={18} /> Novo Artigo
         </Link>
       </div>
 
-      <div className="admin-card" style={{ padding: '24px' }}>
+      {/* BARRA DE FILTROS & BUSCA */}
+      <div className="admin-card" style={{ padding: '18px 24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 300px', maxWidth: '400px', position: 'relative' }}>
+          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-text-dim)' }} />
+          <input 
+            type="text"
+            placeholder="Buscar por título ou categoria..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="admin-input"
+            style={{ paddingLeft: '40px', height: '40px' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--admin-text-dim)', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 700, marginRight: '4px' }}>
+            Status:
+          </span>
+          <button 
+            onClick={() => setStatusFilter('todos')} 
+            className={`ai-preset-chip ${statusFilter === 'todos' ? 'active' : ''}`}
+            style={{ background: statusFilter === 'todos' ? 'var(--admin-accent)' : undefined, color: statusFilter === 'todos' ? '#fff' : undefined }}
+          >
+            Todos ({posts.length})
+          </button>
+          <button 
+            onClick={() => setStatusFilter('publicado')} 
+            className={`ai-preset-chip ${statusFilter === 'publicado' ? 'active' : ''}`}
+            style={{ background: statusFilter === 'publicado' ? 'var(--admin-success)' : undefined, color: statusFilter === 'publicado' ? '#fff' : undefined }}
+          >
+            Publicados
+          </button>
+          <button 
+            onClick={() => setStatusFilter('rascunho')} 
+            className={`ai-preset-chip ${statusFilter === 'rascunho' ? 'active' : ''}`}
+            style={{ background: statusFilter === 'rascunho' ? 'var(--admin-warning)' : undefined, color: statusFilter === 'rascunho' ? '#fff' : undefined }}
+          >
+            Rascunhos
+          </button>
+        </div>
+      </div>
+
+      {/* TABELA DE ARTIGOS */}
+      <div className="admin-card" style={{ padding: '0px', overflow: 'hidden' }}>
         <div className="table-responsive">
-          <table className="admin-table" style={{ width: '100%', textAlign: 'left' }}>
+          <table className="admin-table">
             <thead>
               <tr>
-                <th style={{ paddingBottom: '16px' }}>Título</th>
-                <th style={{ paddingBottom: '16px' }}>Categoria</th>
-                <th style={{ paddingBottom: '16px', textAlign: 'center' }} title="Visualizações">
-                  <Eye size={18} color="#a1a1aa" style={{ margin: '0 auto' }} />
-                </th>
-                <th style={{ paddingBottom: '16px', textAlign: 'center' }} title="Curtidas">
-                  <ThumbsUp size={18} color="#a1a1aa" style={{ margin: '0 auto' }} />
-                </th>
-                <th style={{ paddingBottom: '16px', textAlign: 'center' }} title="Comentários">
-                  <MessageSquare size={18} color="#a1a1aa" style={{ margin: '0 auto' }} />
-                </th>
-                <th style={{ paddingBottom: '16px', textAlign: 'center' }} title="Compartilhamentos">
-                  <Share2 size={18} color="#a1a1aa" style={{ margin: '0 auto' }} />
-                </th>
-                <th style={{ paddingBottom: '16px' }}>Status</th>
-                <th style={{ paddingBottom: '16px' }}>Ações</th>
+                <th style={{ paddingLeft: '24px' }}>Artigo</th>
+                <th>Categoria</th>
+                <th style={{ textAlign: 'center' }} title="Visualizações"><Eye size={16} style={{ margin: '0 auto', color: 'var(--admin-accent)' }} /></th>
+                <th style={{ textAlign: 'center' }} title="Curtidas"><ThumbsUp size={16} style={{ margin: '0 auto', color: 'var(--admin-success)' }} /></th>
+                <th style={{ textAlign: 'center' }} title="Comentários"><MessageSquare size={16} style={{ margin: '0 auto', color: 'var(--admin-warning)' }} /></th>
+                <th style={{ textAlign: 'center' }} title="Compartilhamentos"><Share2 size={16} style={{ margin: '0 auto', color: 'var(--admin-purple)' }} /></th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right', paddingRight: '24px' }}>Ações</th>
               </tr>
             </thead>
             <tbody>
-              {posts.map((post: any) => (
-                <tr key={post.id} style={{ borderTop: '1px solid #27272a' }}>
-                  <td style={{ fontWeight: 'bold', padding: '16px 0', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {post.titulo}
+              {filteredPosts.map((post: any) => (
+                <tr key={post.id}>
+                  {/* Artigo Cover + Título */}
+                  <td style={{ paddingLeft: '24px', paddingRight: '16px', maxWidth: '320px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      {post.imagem_capa ? (
+                        <img 
+                          src={post.imagem_capa} 
+                          alt="" 
+                          style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1px solid var(--admin-card-border)', flexShrink: 0 }} 
+                        />
+                      ) : (
+                        <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--admin-card-border)', flexShrink: 0 }}>
+                          <FileText size={20} color="var(--admin-text-dim)" />
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ margin: 0, fontWeight: 700, color: '#fff', fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {post.titulo}
+                        </p>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--admin-text-dim)', fontFamily: 'monospace' }}>
+                          /{post.slug}
+                        </span>
+                      </div>
+                    </div>
                   </td>
-                  <td style={{ color: '#a1a1aa', padding: '16px 0' }}>{post.categoria_nome}</td>
-                  
-                  {/* Métricas de Engajamento */}
-                  <td style={{ textAlign: 'center', color: '#3b82f6', fontWeight: 'bold', padding: '16px 0' }}>
+
+                  {/* Categoria */}
+                  <td>
+                    <span className="category-badge">
+                      {post.categoria_nome || 'Sem Categoria'}
+                    </span>
+                  </td>
+
+                  {/* Métricas */}
+                  <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--admin-accent)' }}>
                     {post.visualizacoes || 0}
                   </td>
-                  <td style={{ textAlign: 'center', color: '#10b981', fontWeight: 'bold', padding: '16px 0' }}>
+                  <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--admin-success)' }}>
                     {post.likes_count || 0}
                   </td>
-                  <td style={{ textAlign: 'center', color: '#f59e0b', fontWeight: 'bold', padding: '16px 0' }}>
+                  <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--admin-warning)' }}>
                     {post.comentarios_count || 0}
                   </td>
-                  <td style={{ textAlign: 'center', color: '#8b5cf6', fontWeight: 'bold', padding: '16px 0' }}>
+                  <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--admin-purple)' }}>
                     {post.compartilhamentos || 0}
                   </td>
 
-                  <td style={{ padding: '16px 0' }}>
-                    <span style={{ 
-                      padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
-                      background: post.status === 'publicado' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                      color: post.status === 'publicado' ? '#10b981' : '#f59e0b'
-                    }}>
-                      {post.status.toUpperCase()}
+                  {/* Status */}
+                  <td>
+                    <span className={`status-pill ${post.status === 'publicado' ? 'publicado' : 'rascunho'}`}>
+                      {post.status === 'publicado' ? '● Publicado' : '○ Rascunho'}
                     </span>
                   </td>
-                  <td style={{ display: 'flex', gap: '12px', padding: '16px 0' }}>
-                    <button onClick={() => navigate(`/admin/blog/edit/${post.id}`)} className="icon-btn" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                      <Edit size={18} color="#3b82f6" />
-                    </button>
-                    <button onClick={() => handleDelete(post.id)} className="icon-btn" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                      <Trash2 size={18} color="#ef4444" />
-                    </button>
+
+                  {/* Ações */}
+                  <td style={{ textAlign: 'right', paddingRight: '24px' }}>
+                    <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
+                      <a 
+                        href={`/lab/${post.slug}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="action-icon-btn view" 
+                        title="Visualizar no KSI Lab"
+                      >
+                        <ExternalLink size={15} />
+                      </a>
+                      <button 
+                        onClick={() => navigate(`/admin/blog/edit/${post.id}`)} 
+                        className="action-icon-btn edit" 
+                        title="Editar Artigo"
+                      >
+                        <Edit size={15} />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(post.id, post.titulo)} 
+                        className="action-icon-btn delete" 
+                        title="Excluir Artigo"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
-              {posts.length === 0 && (
-                <tr><td colSpan={8} style={{ padding: '20px 0', textAlign: 'center', color: '#a1a1aa' }}>Nenhum artigo encontrado.</td></tr>
+
+              {filteredPosts.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={8} style={{ padding: '64px 24px', textAlign: 'center' }}>
+                    <FileText size={42} style={{ color: 'var(--admin-text-dim)', margin: '0 auto 16px', opacity: 0.4 }} />
+                    <p style={{ color: 'var(--admin-text-muted)', fontSize: '1rem', margin: '0 0 16px 0' }}>
+                      {search ? 'Nenhum artigo encontrado para esta busca.' : 'Nenhum artigo cadastrado ainda.'}
+                    </p>
+                    <Link to="/admin/blog/new" className="btn btn-primary" style={{ display: 'inline-flex', gap: '8px', alignItems: 'center' }}>
+                      <Plus size={16} /> Criar Primeiro Artigo
+                    </Link>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
