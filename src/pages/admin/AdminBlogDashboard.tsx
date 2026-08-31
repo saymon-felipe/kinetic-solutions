@@ -62,15 +62,14 @@ export default function AdminBlogDashboard() {
 
       {/* BARRA DE FILTROS & BUSCA */}
       <div className="admin-card" style={{ padding: '18px 24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 300px', maxWidth: '400px', position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-text-dim)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', flex: '1 1 320px', maxWidth: '420px', position: 'relative' }}>
+          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-text-dim)', pointerEvents: 'none', zIndex: 2 }} />
           <input 
             type="text"
             placeholder="Buscar por título ou categoria..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="admin-input"
-            style={{ paddingLeft: '40px', height: '40px' }}
+            className="admin-input admin-search-input"
           />
         </div>
 

@@ -422,8 +422,8 @@ export default function BlogAdmin() {
 
         </div>
 
-        {/* COLUNA DIREITA: CONFIGURAÇÕES, SEO & PREVIEW (STICKY) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', position: 'sticky', top: '24px' }}>
+        {/* COLUNA DIREITA: CONFIGURAÇÕES, SEO & PREVIEW */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           {/* CARD DE STATUS & PUBLICAÇÃO */}
           <div className="admin-card">
@@ -480,7 +480,7 @@ export default function BlogAdmin() {
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
+            <div>
               <label className="admin-label">Categoria</label>
               <select 
                 value={post.categoria_id}
@@ -492,16 +492,6 @@ export default function BlogAdmin() {
                 ))}
               </select>
             </div>
-
-            <button 
-              type="button"
-              onClick={handleSave} 
-              disabled={saving}
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '14px', display: 'flex', justifyContent: 'center', gap: '10px' }}
-            >
-              <Save size={18} /> {saving ? 'Salvando...' : 'Salvar Alterações'}
-            </button>
           </div>
 
           {/* CARD DE AGENDAMENTO */}
