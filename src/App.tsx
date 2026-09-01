@@ -25,6 +25,8 @@ import AdminBlogCategories from './pages/admin/AdminBlogCategories';
 import AdminBlogInteractions from './pages/admin/AdminBlogInteractions';
 import AdminProjectsDashboard from './pages/admin/AdminProjectsDashboard';
 import AdminProjectForm from './pages/admin/AdminProjectForm';
+import AdminProjectCategories from './pages/admin/AdminProjectCategories';
+import AdminProjectTags from './pages/admin/AdminProjectTags';
 
 //TODO: Modularizar as funções de Analytics em hooks separados.
 
@@ -143,6 +145,8 @@ function App() {
           <Route path="projetos" element={<AdminProjectsDashboard />} />
           <Route path="projetos/novo" element={<AdminProjectForm />} />
           <Route path="projetos/editar/:id" element={<AdminProjectForm />} />
+          <Route path="projetos/categorias" element={<AdminProjectCategories />} />
+          <Route path="projetos/tags" element={<AdminProjectTags />} />
         </Route>
       </Routes>
     </div>

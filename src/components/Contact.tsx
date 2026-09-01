@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef, type ChangeEvent, type FormEvent } 
 import { motion } from 'motion/react';
 import { Send, CheckCircle2, AlertCircle, MessageCircle, Mail, Phone, Clock, Sparkles } from 'lucide-react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function Contact() {
+  const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,7 +40,7 @@ export default function Contact() {
     setStatus('loading');
 
     try {
-      await api.post('/utils/contact', formData);
+      await api.post('/utils/contact', { ...formData, locale: i18n.resolvedLanguage || 'pt-BR' });
       setStatus('success');
       setFormData({ name: '', email: '', tel: '', requestType: '', obs: '' });
       setTimeout(() => setStatus('idle'), 6000);
@@ -49,9 +51,9 @@ export default function Contact() {
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Olá! Vim através do site da Kinetic Solutions e gostaria de solicitar um orçamento para um projeto.${formData.requestType ? ` Tenho interesse em: ${formData.requestType}.` : ''}`
+    `${t('contact.whatsappMessage')}${formData.requestType ? ` ${formData.requestType}.` : ''}`
   );
-  const whatsappUrl = `https://wa.me/5511999999999?text=${whatsappMessage}`; // Link flexível para WhatsApp
+  const whatsappUrl = `https://wa.me/5511978250274?text=${whatsappMessage}`;
 
   return (
     <section className="section contact-section" id="contato">
@@ -64,7 +66,7 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            INICIE SEU PROJETO
+            {t('contact.badge')}
           </motion.span>
           <motion.h2 
             className="section-title"
@@ -73,7 +75,7 @@ export default function Contact() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            Fale <span>Conosco</span>
+            {t('contact.title')}
           </motion.h2>
           <motion.p
             className="section-subtitle"
@@ -82,7 +84,7 @@ export default function Contact() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Conte-nos sobre sua ideia ou desafio técnico. Nossa equipe responderá rapidamente com uma proposta personalizada.
+            {t('contact.subtitle')}
           </motion.p>
         </div>
 
@@ -96,14 +98,14 @@ export default function Contact() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h3 className="contact-info-title">Vamos Tirar Sua Ideia do Papel?</h3>
+            <h3 className="contact-info-title">{t('contact.infoTitle')}</h3>
             <p className="contact-info-desc">
-              Preencha o formulário ao lado para uma análise técnica detalhada do seu projeto, ou escolha um dos canais diretos abaixo.
+              {t('contact.infoDescription')}
             </p>
 
             <div className="contact-channels">
               <a 
-                href="https://wa.me/5511978250274?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20com%20a%20Kinetic%20Solutions." 
+                href={whatsappUrl}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="contact-channel-item whatsapp-channel hover-target"
@@ -112,8 +114,8 @@ export default function Contact() {
                   <MessageCircle size={22} />
                 </div>
                 <div className="channel-text">
-                  <span className="channel-name">WhatsApp Direto</span>
-                  <span className="channel-sub">Atendimento ágil em tempo real</span>
+                  <span className="channel-name">{t('contact.whatsapp')}</span>
+                  <span className="channel-sub">{t('contact.whatsappDescription')}</span>
                 </div>
               </a>
 
@@ -122,7 +124,7 @@ export default function Contact() {
                   <Mail size={22} />
                 </div>
                 <div className="channel-text">
-                  <span className="channel-name">E-mail Comercial</span>
+                  <span className="channel-name">{t('contact.commercialEmail')}</span>
                   <span className="channel-sub">contato@kineticsolutions.com.br</span>
                 </div>
               </div>
@@ -132,15 +134,15 @@ export default function Contact() {
                   <Clock size={22} />
                 </div>
                 <div className="channel-text">
-                  <span className="channel-name">Tempo de Resposta</span>
-                  <span className="channel-sub">Em até 2 horas úteis</span>
+                  <span className="channel-name">{t('contact.responseTime')}</span>
+                  <span className="channel-sub">{t('contact.responseTimeDescription')}</span>
                 </div>
               </div>
             </div>
 
             <div className="contact-guarantee-badge">
               <Sparkles size={16} className="guarantee-icon" />
-              <span>Orçamento 100% gratuito e sem compromisso</span>
+              <span>{t('contact.guarantee')}</span>
             </div>
           </motion.div>
 
@@ -156,27 +158,27 @@ export default function Contact() {
               
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="name">Nome Completo *</label>
+                  <label htmlFor="name">{t('contact.name')}</label>
                   <input 
                     type="text" 
                     id="name" 
                     name="name" 
                     value={formData.name} 
                     onChange={handleChange} 
-                    placeholder="Seu nome ou da sua empresa" 
+                    placeholder={t('contact.namePlaceholder')} 
                     required 
                   />
                 </div>
                 
                 <div className="form-group">
-                  <label htmlFor="email">E-mail Corporativo *</label>
+                  <label htmlFor="email">{t('contact.email')}</label>
                   <input 
                     type="email" 
                     id="email" 
                     name="email" 
                     value={formData.email} 
                     onChange={handleChange} 
-                    placeholder="seuemail@empresa.com" 
+                    placeholder={t('contact.emailPlaceholder')} 
                     required 
                   />
                 </div>
@@ -184,19 +186,19 @@ export default function Contact() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="phone">Telefone / WhatsApp</label>
+                  <label htmlFor="phone">{t('contact.phone')}</label>
                   <input 
                     type="tel" 
                     id="phone" 
                     name="tel" 
                     value={formData.tel} 
                     onChange={handleChange} 
-                    placeholder="(00) 00000-0000" 
+                    placeholder={t('contact.phonePlaceholder')} 
                   />
                 </div>
 
                 <div className={`form-group ${serviceHighlighted ? 'highlight-pulse' : ''}`}>
-                  <label htmlFor="service">Serviço de Interesse</label>
+                  <label htmlFor="service">{t('contact.service')}</label>
                   <select 
                     id="service" 
                     name="requestType" 
@@ -204,25 +206,25 @@ export default function Contact() {
                     value={formData.requestType} 
                     onChange={handleChange}
                   >
-                    <option value="">Selecione um serviço</option>
-                    <option value="Desenvolvimento Web">Sistemas & Aplicações Web (ERP / SaaS)</option>
-                    <option value="Aplicativos Mobile">Aplicativos Mobile (iOS / Android)</option>
-                    <option value="Consultoria em TI">Cloud & Consultoria Técnica</option>
-                    <option value="UI/UX Design">Design UI/UX & Prototipagem</option>
-                    <option value="Outro Projeto">Outro Projeto Personalizado</option>
+                    <option value="">{t('contact.selectService')}</option>
+                    <option value="Desenvolvimento Web">{t('contact.services.0')}</option>
+                    <option value="Aplicativos Mobile">{t('contact.services.1')}</option>
+                    <option value="Consultoria em TI">{t('contact.services.2')}</option>
+                    <option value="UI/UX Design">{t('contact.services.3')}</option>
+                    <option value="Outro Projeto">{t('contact.services.4')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="message">Detalhes do Projeto *</label>
+                <label htmlFor="message">{t('contact.details')}</label>
                 <textarea 
                   id="message" 
                   name="obs" 
                   rows={4} 
                   value={formData.obs} 
                   onChange={handleChange} 
-                  placeholder="Fale um pouco sobre o que precisa, prazo estimado e objetivos..."
+                  placeholder={t('contact.detailsPlaceholder')}
                   required
                 ></textarea>
               </div>
@@ -233,10 +235,10 @@ export default function Contact() {
                 disabled={status === 'loading'}
               >
                 {status === 'loading' ? (
-                  <span>Enviando Mensagem...</span>
+                  <span>{t('contact.sending')}</span>
                 ) : (
                   <>
-                    <span>ENVIAR SOLICITAÇÃO</span>
+                    <span>{t('contact.send')}</span>
                     <Send size={16} />
                   </>
                 )}
@@ -245,14 +247,14 @@ export default function Contact() {
               {status === 'success' && (
                 <div className="form-feedback success">
                   <CheckCircle2 size={18} />
-                  <span>Mensagem enviada com sucesso! Entraremos em contato em breve.</span>
+                  <span>{t('contact.success')}</span>
                 </div>
               )}
 
               {status === 'error' && (
                 <div className="form-feedback error">
                   <AlertCircle size={18} />
-                  <span>Houve um erro ao enviar. Por favor, tente novamente ou use o WhatsApp direto.</span>
+                  <span>{t('contact.error')}</span>
                 </div>
               )}
             </form>
@@ -263,4 +265,4 @@ export default function Contact() {
       </div>
     </section>
   );
-}
+}

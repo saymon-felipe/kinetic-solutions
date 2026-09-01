@@ -69,9 +69,11 @@ function SortableProjectRow({ project, dragDisabled, onEdit, onDelete }: Sortabl
 }
 
 export default function AdminProjectsDashboard() {
+  type ProjectFilter = 'active' | 'inactive' | 'all';
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ProjectFilter>('active');
   const [reordering, setReordering] = useState(false);
   const navigate = useNavigate();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -88,8 +90,10 @@ export default function AdminProjectsDashboard() {
 
   const filteredProjects = useMemo(() => projects.filter((project) => {
     const query = search.toLowerCase();
-    return project.title.toLowerCase().includes(query) || project.category.toLowerCase().includes(query);
-  }), [projects, search]);
+    const matchesSearch = project.title.toLowerCase().includes(query) || project.category.toLowerCase().includes(query);
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? project.published : !project.published);
+    return matchesSearch && matchesStatus;
+  }), [projects, search, statusFilter]);
 
   const handleDelete = async (project: AdminProject) => {
     if (!window.confirm(`Excluir o projeto “${project.title}”? A imagem enviada também será removida.`)) return;
@@ -133,9 +137,14 @@ export default function AdminProjectsDashboard() {
         <Link to="/admin/projetos/novo" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '12px 24px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', border: 'none' }}><Plus size={18} /> Novo projeto</Link>
       </div>
 
-      <div className="admin-card" style={{ padding: '18px 24px', marginBottom: '24px', position: 'relative', maxWidth: '460px' }}>
-        <Search size={18} style={{ position: 'absolute', top: '50%', left: '40px', transform: 'translateY(-50%)', color: 'var(--admin-text-dim)' }} />
-        <input className="admin-input admin-search-input" placeholder="Buscar por projeto ou categoria..." value={search} onChange={(event) => setSearch(event.target.value)} />
+      <div className="admin-card" style={{ padding: '18px 24px', marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <div style={{ display: 'inline-flex', gap: '8px', flexWrap: 'wrap' }}>
+          {([['active', 'Ativos'], ['inactive', 'Inativos'], ['all', 'Todos']] as const).map(([filter, label]) => <button key={filter} type="button" onClick={() => setStatusFilter(filter)} className="category-pill" style={{ border: 0, cursor: 'pointer', opacity: statusFilter === filter ? 1 : 0.65, background: statusFilter === filter ? 'var(--admin-accent)' : undefined, color: statusFilter === filter ? '#fff' : undefined }}>{label} ({filter === 'active' ? projects.filter((project) => project.published).length : filter === 'inactive' ? projects.filter((project) => !project.published).length : projects.length})</button>)}
+        </div>
+        <div style={{ position: 'relative', width: 'min(100%, 420px)' }}>
+          <Search size={18} style={{ position: 'absolute', top: '50%', left: '16px', transform: 'translateY(-50%)', color: 'var(--admin-text-dim)' }} />
+          <input className="admin-input admin-search-input" style={{ paddingLeft: '44px' }} placeholder="Buscar por projeto ou categoria..." value={search} onChange={(event) => setSearch(event.target.value)} />
+        </div>
       </div>
 
       <div className="admin-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -146,7 +155,7 @@ export default function AdminProjectsDashboard() {
                 <thead><tr><th style={{ width: '42px', paddingLeft: '18px' }} aria-label="Reordenar" /><th>Projeto</th><th>Categoria</th><th>Status</th><th style={{ textAlign: 'right', paddingRight: '24px' }}>Ações</th></tr></thead>
                 <SortableContext items={filteredProjects.map((project) => project.id)} strategy={verticalListSortingStrategy}>
                   <tbody>
-                    {filteredProjects.map((project) => <SortableProjectRow key={project.id} project={project} dragDisabled={Boolean(search) || reordering} onEdit={() => navigate(`/admin/projetos/editar/${project.id}`)} onDelete={() => handleDelete(project)} />)}
+                    {filteredProjects.map((project) => <SortableProjectRow key={project.id} project={project} dragDisabled={Boolean(search) || statusFilter !== 'all' || reordering} onEdit={() => navigate(`/admin/projetos/editar/${project.id}`)} onDelete={() => handleDelete(project)} />)}
                     {filteredProjects.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', padding: '64px 24px', color: 'var(--admin-text-muted)' }}><FolderKanban size={42} style={{ opacity: 0.45, marginBottom: '12px' }} /><p>Nenhum projeto encontrado.</p></td></tr>}
                   </tbody>
                 </SortableContext>

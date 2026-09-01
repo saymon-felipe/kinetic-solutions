@@ -1,7 +1,9 @@
 import { motion } from 'motion/react';
 import { Linkedin, Github, Code, CheckCircle, Sparkles, Quote } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function AboutFounder() {
+  const { t } = useTranslation();
   return (
     <section className="section founder-section" id="sobre">
       <div className="container">
@@ -17,31 +19,29 @@ export default function AboutFounder() {
           >
             <div className="section-badge founder-badge">
               <Sparkles size={13} />
-              <span>LIDERANÇA & VISÃO TÉCNICA</span>
+              <span>{t('founder.badge')}</span>
             </div>
 
             <h2 className="founder-name">Saymon Felipe</h2>
-            <span className="founder-role">Fundador & Arquiteto de Software</span>
+            <span className="founder-role">{t('founder.role')}</span>
 
             <p className="founder-bio">
-              Com sólida experiência em engenharia de software e desenvolvimento de plataformas escaláveis, 
-              Saymon Felipe lidera a <strong>Kinetic Solutions (KSI)</strong> com a missão de construir soluções 
-              tecnológicas que aliam alta performance de código, arquitetura limpa e design focado no usuário final.
+              {t('founder.bio')}
             </p>
 
             {/* Destaques de Competências */}
             <div className="founder-highlights">
               <div className="highlight-item">
                 <CheckCircle size={16} className="highlight-icon" />
-                <span>Arquitetura de Sistemas & Cloud</span>
+                <span>{t('founder.highlights.0')}</span>
               </div>
               <div className="highlight-item">
                 <CheckCircle size={16} className="highlight-icon" />
-                <span>Desenvolvimento Full Stack & Mobile</span>
+                <span>{t('founder.highlights.1')}</span>
               </div>
               <div className="highlight-item">
                 <CheckCircle size={16} className="highlight-icon" />
-                <span>Design de Produtos & UX de Conversão</span>
+                <span>{t('founder.highlights.2')}</span>
               </div>
             </div>
 
@@ -49,7 +49,7 @@ export default function AboutFounder() {
             <div className="founder-quote-box glass-panel">
               <Quote size={20} className="quote-icon" />
               <p>
-                "Nossa visão nos move, nossa expertise te guia. Entregamos soluções dinâmicas para o ritmo do seu negócio, garantindo a solidez que você precisa para crescer com segurança."
+                {t('founder.quote')}
               </p>
             </div>
 
@@ -62,7 +62,7 @@ export default function AboutFounder() {
                 className="btn btn-primary hover-target"
               >
                 <Linkedin size={16} />
-                <span>Conectar no LinkedIn</span>
+                <span>{t('founder.linkedin')}</span>
               </a>
               <a 
                 href="https://github.com/saymon-felipe" 
@@ -88,7 +88,7 @@ export default function AboutFounder() {
               <div className="founder-image-frame">
                 <img 
                   src="/foto-saymon.webp" 
-                  alt="Saymon Felipe - Fundador da Kinetic Solutions" 
+                  alt={t('founder.imageAlt')} 
                   className="founder-photo"
                   referrerPolicy="no-referrer"
                 />
@@ -97,7 +97,7 @@ export default function AboutFounder() {
               <div className="founder-card-footer">
                 <div className="founder-status-indicator">
                   <span className="status-pulse"></span>
-                  <span>Disponível para novos projetos e consultorias</span>
+                  <span>{t('founder.availability')}</span>
                 </div>
               </div>
             </div>

@@ -151,6 +151,84 @@
   box-shadow: 0 0 10px var(--admin-accent);
 }
 
+/* Submenu & Dropdown Navigation */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-parent-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  color: var(--admin-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nav-parent-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--admin-text-main);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-parent-btn.active-group {
+  color: #fff;
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+.nav-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(56, 189, 248, 0.25);
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  color: var(--admin-text-muted);
+  text-decoration: none;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
+}
+
+.nav-sub-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateX(3px);
+}
+
+.nav-sub-item.active {
+  color: var(--admin-accent);
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.25);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.1);
+}
+
 .sidebar-user-card {
   margin-top: auto;
   padding: 16px;
@@ -808,6 +886,97 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Project Editor Styles */
+.project-dropzone {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(56, 189, 248, 0.35);
+  border-radius: 16px;
+  padding: 24px;
+  background: rgba(56, 189, 248, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.project-dropzone:hover {
+  border-color: var(--admin-accent);
+  background: rgba(56, 189, 248, 0.07);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
+}
+
+.project-preview-image {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.lang-tab-bar {
+  display: flex;
+  gap: 8px;
+  background: rgba(6, 10, 20, 0.6);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--admin-card-border);
+  margin-bottom: 16px;
+}
+
+.lang-tab-item {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--admin-text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.lang-tab-item.active {
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--admin-accent);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.15);
+}
+
+.tag-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: var(--admin-accent);
+  font-size: 0.78rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.portfolio-preview-card {
+  background: rgba(10, 16, 32, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+}
+
 
 /* KSI LOADER ADMIN ADAPTATION */
 .admin-wrapper .ksi-loader-disc,

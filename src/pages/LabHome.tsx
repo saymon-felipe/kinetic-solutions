@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BlogLoader from '../components/BlogLoader';
 import '../styles/blog.css';
+import { useTranslation } from 'react-i18next';
 
 export default function LabHome() {
+  const { t, i18n } = useTranslation();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('todas');
@@ -24,7 +26,7 @@ export default function LabHome() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Date(dateString).toLocaleDateString(i18n.resolvedLanguage || 'pt-BR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
@@ -32,11 +34,11 @@ export default function LabHome() {
   };
 
   const calculateReadTime = (content: string) => {
-    if (!content) return '3 min';
+    if (!content) return t('lab.readTime', { minutes: 3 });
     const text = content.replace(/<[^>]*>/g, '');
     const words = text.trim().split(/\s+/).length;
     const minutes = Math.ceil(words / 200);
-    return `${minutes || 2} min`;
+    return t('lab.readTime', { minutes: minutes || 2 });
   };
 
   // Categorias únicas extraídas dos posts
@@ -66,8 +68,8 @@ export default function LabHome() {
   return (
     <div className="blog-container">
       <Helmet>
-        <title>KSI LAB | Laboratório de Inovações & Pesquisa Tech</title>
-        <meta name="description" content="Artigos técnicos, pesquisas em inteligência artificial, engenharia de software e tendências digitais pela Kinetic Solutions." />
+        <title>{t('lab.title')}</title>
+        <meta name="description" content={t('lab.description')} />
         <link rel="canonical" href="https://kineticsolutions.com.br/lab" />
       </Helmet>
 
@@ -80,7 +82,7 @@ export default function LabHome() {
           </span>
         </div>
         <h1 className="blog-title">KSI <span className="text-blue">LAB</span></h1>
-        <p className="blog-subtitle">Inovações, pesquisas avançadas e o futuro do desenvolvimento.</p>
+        <p className="blog-subtitle">{t('lab.subtitle')}</p>
       </div>
 
       {/* BARRA DE CONTROLE: BUSCA E FILTRO DE CATEGORIAS */}
@@ -89,7 +91,7 @@ export default function LabHome() {
           <Search size={18} className="lab-search-icon" />
           <input 
             type="text" 
-            placeholder="Pesquisar artigos, temas ou tecnologias..." 
+            placeholder={t('lab.search')} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="lab-search-input"
@@ -103,7 +105,7 @@ export default function LabHome() {
               onClick={() => setSelectedCategory('todas')}
               className={`category-pill ${selectedCategory === 'todas' ? 'active' : ''}`}
             >
-              Todos ({posts.length})
+              {t('lab.all')} ({posts.length})
             </button>
             {categories.map((cat, i) => (
               <button 
@@ -120,15 +122,15 @@ export default function LabHome() {
 
       {loading ? (
         <BlogLoader
-          title="Preparando o Lab"
-          message="Estamos buscando os artigos e organizando as ideias para você."
+          title={t('lab.loadingTitle')}
+          message={t('lab.loadingMessage')}
         />
       ) : filteredPosts.length === 0 ? (
         <div className="blog-feedback-state blog-feedback-state--empty">
           <BookOpen size={40} style={{ margin: '0 auto 14px', opacity: 0.5, color: 'var(--accent-color)' }} />
-          <h3 style={{ fontSize: '1.2rem', marginBottom: '6px', color: 'var(--text-primary)' }}>Nenhum artigo encontrado</h3>
+          <h3 style={{ fontSize: '1.2rem', marginBottom: '6px', color: 'var(--text-primary)' }}>{t('lab.noArticles')}</h3>
           <p style={{ margin: 0, fontSize: '0.95rem' }}>
-            {searchQuery ? `Não encontramos publicações para "${searchQuery}". Tente outros termos.` : 'Nenhum artigo publicado nesta categoria no momento.'}
+            {searchQuery ? t('lab.noSearch', { query: searchQuery }) : t('lab.noCategory')}
           </p>
         </div>
       ) : (
@@ -147,7 +149,7 @@ export default function LabHome() {
                 
                 <div className="featured-post-content">
                   <div className="featured-post-meta">
-                    <span className="post-category">{featuredPost.categoria_nome || 'Inovação'}</span>
+                    <span className="post-category">{featuredPost.categoria_nome || t('lab.fallbackCategory')}</span>
                     <span className="post-meta-tag">
                       <Clock size={14} /> {formatDate(featuredPost.data_publicacao)} • {calculateReadTime(featuredPost.conteudo)}
                     </span>
@@ -155,15 +157,15 @@ export default function LabHome() {
                   
                   <h2 className="featured-post-title">{featuredPost.titulo}</h2>
                   <p className="featured-post-desc">
-                    {featuredPost.descricao || 'Clique para ler este artigo completo no nosso laboratório de inovações...'}
+                    {featuredPost.descricao || t('lab.fallbackDescription')}
                   </p>
                   
                   <div className="featured-post-footer">
                     <span className="post-meta-tag">
-                      <User size={14} /> {featuredPost.autor_nome || 'Equipe KSI'}
+                      <User size={14} /> {featuredPost.autor_nome || t('lab.team')}
                     </span>
                     <span className="read-more-link">
-                      Ler artigo completo <ArrowRight size={16} />
+                      {t('lab.readFull')} <ArrowRight size={16} />
                     </span>
                   </div>
                 </div>
@@ -196,7 +198,7 @@ export default function LabHome() {
 
                       <h3 className="post-card-title">{post.titulo}</h3>
                       <p className="post-description">
-                        {post.descricao || 'Clique para ler este artigo completo no laboratório de inovações...'}
+                        {post.descricao || t('lab.fallbackDescription')}
                       </p>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px' }}>
@@ -204,7 +206,7 @@ export default function LabHome() {
                           <Clock size={12} /> {calculateReadTime(post.conteudo)}
                         </span>
                         <span className="read-more-link">
-                          Ler artigo <ArrowRight size={15} />
+                          {t('lab.read')} <ArrowRight size={15} />
                         </span>
                       </div>
                     </div>

@@ -7,8 +7,10 @@ import { useGoogleLogin } from '@react-oauth/google';
 import api from '../services/api';
 import BlogLoader from '../components/BlogLoader';
 import '../styles/blog.css';
+import { useTranslation } from 'react-i18next';
 
 function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any) {
+  const { t } = useTranslation();
   const [novoComentario, setNovoComentario] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -23,7 +25,7 @@ function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any)
       setNovoComentario('');
       onCommentSuccess(); 
     } catch (e) { 
-      alert("Erro ao publicar comentário."); 
+      alert(t('lab.commentError')); 
     } finally {
       setSubmitting(false);
     }
@@ -37,26 +39,26 @@ function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any)
             <img src={user.imagem} alt="Avatar" className="comment-avatar comment-avatar--sm" referrerPolicy="no-referrer" />
             <div>
               <span style={{ display: 'block', color: 'var(--text-primary)', fontWeight: 700 }}>{user.nome}</span>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Participando como leitor credenciado</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('lab.commenter')}</span>
             </div>
           </div>
           <textarea 
-            placeholder="Compartilhe seus insights, dúvidas ou considerações sobre este artigo..." 
+            placeholder={t('lab.commentPlaceholder')} 
             value={novoComentario}
             onChange={e => setNovoComentario(e.target.value)}
             className="comment-textarea"
             rows={3}
           />
           <button type="submit" disabled={submitting || !novoComentario.trim()} className="btn btn-primary comment-submit">
-            {submitting ? 'Publicando...' : 'Publicar Comentário'}
+            {submitting ? t('lab.publishing') : t('lab.publish')}
           </button>
         </form>
       ) : (
         <div className="comment-login-state">
-          <h4 style={{ fontSize: '1.1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>Participe da Conversa</h4>
-          <p style={{ margin: '0 0 16px 0' }}>Faça login com sua conta Google para comentar e interagir com o autor e a comunidade.</p>
+          <h4 style={{ fontSize: '1.1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>{t('lab.join')}</h4>
+          <p style={{ margin: '0 0 16px 0' }}>{t('lab.loginPrompt')}</p>
           <button type="button" onClick={() => loginGoogle()} className="btn btn-primary">
-            Entrar com o Google
+            {t('lab.loginGoogle')}
           </button>
         </div>
       )}
@@ -65,6 +67,7 @@ function CaixaDeComentario({ user, postId, loginGoogle, onCommentSuccess }: any)
 }
 
 export default function LabPost() {
+  const { t, i18n } = useTranslation();
   const { slug } = useParams();
   const [post, setPost] = useState<any>(null);
   const [interacoes, setInteracoes] = useState({ likes: 0, compartilhamentos: 0, userLiked: false });
@@ -121,9 +124,9 @@ export default function LabPost() {
       try {
         await api.post('/users/google-login', { token: codeResponse.code });
         window.dispatchEvent(new Event('authChange'));
-        showToast('Login realizado com sucesso!');
+        showToast(t('lab.loginSuccess'));
       } catch (error) {
-        alert('Erro ao fazer login.');
+        alert(t('lab.loginError'));
       }
     },
     flow: 'auth-code',
@@ -144,10 +147,10 @@ export default function LabPost() {
       }));
 
       if (status === 'adicionado') {
-        showToast('Obrigado pelo seu feedback!');
+        showToast(t('lab.likeThanks'));
       }
     } catch (e) { 
-      alert("Erro ao processar like."); 
+      alert(t('lab.likeError')); 
     }
   };
 
@@ -169,7 +172,7 @@ export default function LabPost() {
       }
     } else {
       navigator.clipboard.writeText(url);
-      showToast('Link copiado para a área de transferência!');
+      showToast(t('lab.copied'));
       registrarCompartilhamento();
     }
   };
@@ -182,23 +185,23 @@ export default function LabPost() {
 
   const recarregarComentarios = () => {
     api.get(`/blog/posts/${post.id}/comentarios`).then(r => setComentarios(r.data.returnObj || r.data));
-    showToast('Comentário enviado!');
+    showToast(t('lab.commentSent'));
   };
 
   const calculateReadTime = (content: string) => {
-    if (!content) return '3 min';
+    if (!content) return t('lab.readTime', { minutes: 3 });
     const text = content.replace(/<[^>]*>/g, '');
     const words = text.trim().split(/\s+/).length;
     const minutes = Math.ceil(words / 200);
-    return `${minutes || 2} min de leitura`;
+    return t('lab.readTime', { minutes: minutes || 2 });
   };
 
   if (!post) {
     return (
       <div className="blog-container post-loading-container">
         <BlogLoader
-          title="Abrindo o artigo"
-          message="Carregando conteúdo, imagem e interações do post."
+          title={t('lab.opening')}
+          message={t('lab.openingMessage')}
         />
       </div>
     );
@@ -247,34 +250,34 @@ export default function LabPost() {
         </Helmet>
 
         <Link to="/lab" className="back-link">
-          <ArrowLeft size={16} /> Voltar para o Lab
+          <ArrowLeft size={16} /> {t('lab.back')}
         </Link>
 
         <header className="post-header-meta">
-          <span className="post-category post-category--hero">{post.categoria_nome || 'Inovação'}</span>
+          <span className="post-category post-category--hero">{post.categoria_nome || t('lab.fallbackCategory')}</span>
           <h1 className="blog-title post-title">{post.titulo}</h1>
           
           <div className="post-meta-info">
             <div className="post-byline">
-              <span><User size={16} /> {post.autor_nome || 'Equipe KSI'}</span>
-              <span><Clock size={16} /> {new Date(post.data_publicacao).toLocaleDateString('pt-BR')} • {calculateReadTime(post.conteudo)}</span>
-              <span><Eye size={16} /> {post.visualizacoes || 0} visualizações</span>
+              <span><User size={16} /> {post.autor_nome || t('lab.team')}</span>
+              <span><Clock size={16} /> {new Date(post.data_publicacao).toLocaleDateString(i18n.resolvedLanguage || 'pt-BR')} • {calculateReadTime(post.conteudo)}</span>
+              <span><Eye size={16} /> {post.visualizacoes || 0} {t('lab.views')}</span>
             </div>
 
             <div className="post-action-row">
               <button 
                 onClick={handleLike} 
                 className={`post-action-btn ${interacoes.userLiked ? 'is-active' : ''}`} 
-                aria-label="Curtir artigo"
+                aria-label={t('lab.like')}
               >
                 <ThumbsUp size={16} fill={interacoes.userLiked ? '#fff' : 'none'} /> {interacoes.likes}
               </button>
               <button 
                 onClick={handleShare} 
                 className="post-action-btn" 
-                aria-label="Compartilhar artigo"
+                aria-label={t('lab.share')}
               >
-                <Share2 size={16} /> Compartilhar
+                <Share2 size={16} /> {t('lab.shareAction')}
               </button>
             </div>
           </div>
@@ -294,7 +297,7 @@ export default function LabPost() {
         {/* SEÇÃO DE COMENTÁRIOS */}
         <section id="comentarios" className="comments-section">
           <h3 className="comments-title">
-            <MessageSquare size={24} color="var(--accent-color)" /> Comentários ({comentarios.length})
+            <MessageSquare size={24} color="var(--accent-color)" /> {t('lab.comments', { count: comentarios.length })}
           </h3>
 
           <CaixaDeComentario 
@@ -311,14 +314,14 @@ export default function LabPost() {
                 <div className="comment-bubble">
                   <div className="comment-heading">
                     <span>{c.nome}</span>
-                    <time>{new Date(c.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</time>
+                    <time>{new Date(c.data).toLocaleDateString(i18n.resolvedLanguage || 'pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</time>
                   </div>
                   <p>{c.comentario}</p>
                 </div>
               </div>
             ))}
             {comentarios.length === 0 && (
-              <p className="empty-comments">Nenhum comentário publicado ainda. Seja o primeiro a iniciar a discussão!</p>
+              <p className="empty-comments">{t('lab.emptyComments')}</p>
             )}
           </div>
         </section>

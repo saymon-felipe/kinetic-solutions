@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import OrganicSphere from './OrganicSphere';
+import { useTranslation } from 'react-i18next';
 
 export default function Hero() {
+  const { t } = useTranslation();
   const [textIndex, setTextIndex] = useState(0);
   const titles = ["KINETIC SOLUTIONS.", "DIGITAL CONCEPTS."];
 
@@ -42,7 +44,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 1.5 }}
         >
           <h1 className="hero-title">
-            FORÇA DA INOVAÇÃO. IDEIAS DO FUTURO.<br />
+            {t('hero.headline')}<br />
             <span>
               <AnimatePresence mode="wait">
                 <motion.span
@@ -61,10 +63,10 @@ export default function Hero() {
           
           <div className="hero-actions">
             <a href="#contato" className="btn btn-primary hover-target">
-              ORÇAMENTO GRATUITO
+              {t('hero.quote')}
             </a>
             <a href="#portfolio" className="btn btn-secondary hover-target">
-              VER CLIENTES
+              {t('hero.clients')}
             </a>
           </div>
         </motion.div>
@@ -80,7 +82,7 @@ export default function Hero() {
         <div className="mouse">
           <div className="wheel"></div>
         </div>
-        <div>Scroll</div>
+        <div>{t('hero.scroll')}</div>
       </motion.div>
     </section>
   );

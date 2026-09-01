@@ -1,38 +1,28 @@
 import { motion } from 'motion/react';
 import { Globe, Smartphone, Server, Sparkles, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const services = [
   {
     id: 'Desenvolvimento Web',
     icon: Globe,
-    title: 'Sistemas & Aplicações Web',
-    description: 'Desenvolvimento de ERPs sob medida, portais corporativos, plataformas SaaS e sites de altíssimo desempenho.',
-    features: ['ERPs & Dashboards', 'Arquitetura Escalável', 'APIs REST & GraphQL', 'Segurança de Ponta']
   },
   {
     id: 'Aplicativos Mobile',
     icon: Smartphone,
-    title: 'Aplicativos Mobile',
-    description: 'Criação de aplicativos para iOS e Android com experiência fluida, sincronização offline e integração completa.',
-    features: ['iOS & Android Nativo/Híbrido', 'UI/UX Fluido', 'Notificações Push', 'Integração com APIs']
   },
   {
     id: 'Consultoria em TI',
     icon: Server,
-    title: 'Cloud & Consultoria Técnica',
-    description: 'Otimização de infraestrutura em nuvem, modernização de código legadas, microsserviços e auditoria de performance.',
-    features: ['AWS & Google Cloud', 'CI/CD & DevOps', 'Microsserviços & Bancos', 'Auditoria de Performance']
   },
   {
     id: 'UI/UX Design',
     icon: Sparkles,
-    title: 'Design UI/UX & Prototipagem',
-    description: 'Construção de identidades visuais e interfaces de usuário modernas, intuitivas e focadas na retenção e conversão de clientes.',
-    features: ['Design Systems', 'Prototipagem Interativa', 'Testes de Usabilidade', 'Foco em Conversão']
   }
 ];
 
 export default function Services() {
+  const { t } = useTranslation();
   const handleServiceClick = (serviceTitle: string) => {
     const event = new CustomEvent('selectService', { detail: { service: serviceTitle } });
     window.dispatchEvent(event);
@@ -62,7 +52,7 @@ export default function Services() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            SOLUÇÕES SOB MEDIDA
+            {t('services.badge')}
           </motion.span>
           <motion.h2 
             className="section-title"
@@ -71,7 +61,7 @@ export default function Services() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            Nossos <span>Serviços</span>
+            {t('services.title')} <span>{t('services.titleAccent')}</span>
           </motion.h2>
           <motion.p
             className="section-subtitle"
@@ -80,7 +70,7 @@ export default function Services() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Tecnologia de ponta e metodologia ágil para construir produtos digitais robustos, velozes e prontos para o futuro.
+            {t('services.subtitle')}
           </motion.p>
         </div>
 
@@ -107,20 +97,20 @@ export default function Services() {
                   </div>
                 </div>
 
-                <h3 className="service-title">{service.title}</h3>
-                <p className="service-desc">{service.description}</p>
+                <h3 className="service-title">{t(`services.items.${index}.title`)}</h3>
+                <p className="service-desc">{t(`services.items.${index}.description`)}</p>
 
                 <div className="service-features-list">
-                  {service.features.map((feat) => (
-                    <div key={feat} className="service-feature-pill">
+                  {[0, 1, 2, 3].map((featureIndex) => (
+                    <div key={featureIndex} className="service-feature-pill">
                       <CheckCircle2 size={13} className="check-icon" />
-                      <span>{feat}</span>
+                      <span>{t(`services.items.${index}.features.${featureIndex}`)}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="service-card-action">
-                  <span>Solicitar este serviço</span>
+                  <span>{t('services.request')}</span>
                   <ArrowUpRight size={15} />
                 </div>
               </motion.div>

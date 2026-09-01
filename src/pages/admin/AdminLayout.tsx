@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, LogOut, List, Menu, X, MessageSquare, ExternalLink, ShieldCheck, ChevronRight, FolderKanban } from 'lucide-react';
+import { 
+  LayoutDashboard, FileText, LogOut, List, Menu, X, MessageSquare, 
+  ExternalLink, ShieldCheck, ChevronRight, ChevronDown, FolderKanban, Tag, FlaskConical, Layers
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import KsiLoader from '../../components/KsiLoader';
@@ -12,6 +15,20 @@ export default function AdminLayout() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Estados dos menus expansíveis
+  const [labOpen, setLabOpen] = useState(true);
+  const [projectsOpen, setProjectsOpen] = useState(true);
+
+  useEffect(() => {
+    // Abre automaticamente os grupos de acordo com a rota ativa
+    if (location.pathname.startsWith('/admin/blog')) {
+      setLabOpen(true);
+    }
+    if (location.pathname.startsWith('/admin/projetos')) {
+      setProjectsOpen(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,14 +66,19 @@ export default function AdminLayout() {
     if (p === '/admin') return 'Analytics & Métricas';
     if (p.startsWith('/admin/blog/new')) return 'Novo Artigo';
     if (p.startsWith('/admin/blog/edit')) return 'Editar Artigo';
-    if (p.startsWith('/admin/blog/categorias')) return 'Categorias';
+    if (p.startsWith('/admin/blog/categorias')) return 'Categorias do Lab';
     if (p.startsWith('/admin/blog/interacoes')) return 'Moderação de Comentários';
     if (p.startsWith('/admin/blog')) return 'Gestão do KSI Lab';
+    if (p.startsWith('/admin/projetos/categorias')) return 'Categorias de Projetos';
+    if (p.startsWith('/admin/projetos/tags')) return 'Tags de Tecnologias';
     if (p.startsWith('/admin/projetos/novo')) return 'Novo Projeto';
     if (p.startsWith('/admin/projetos/editar')) return 'Editar Projeto';
     if (p.startsWith('/admin/projetos')) return 'Gestão de Projetos';
     return 'Painel Geral';
   };
+
+  const isLabActive = location.pathname.startsWith('/admin/blog');
+  const isProjectsActive = location.pathname.startsWith('/admin/projetos');
 
   if (loading) {
     return (
@@ -112,29 +134,132 @@ export default function AdminLayout() {
         </div>
 
         <nav className="sidebar-nav">
+          {/* DASHBOARD PRINCIPAL */}
           <Link to="/admin" className={`nav-item ${location.pathname === '/admin' ? 'active' : ''}`}>
             <LayoutDashboard size={18} /> Dashboard
           </Link>
 
-          <Link to="/admin/blog" className={`nav-item ${
-            location.pathname === '/admin/blog' || 
-            location.pathname.includes('/admin/blog/new') || 
-            location.pathname.includes('/admin/blog/edit') ? 'active' : ''
-          }`}>
-            <FileText size={18} /> KSI Lab Posts
-          </Link>
+          {/* GRUPO 1: LAB */}
+          <div className="nav-group">
+            <button 
+              type="button" 
+              onClick={() => setLabOpen(!labOpen)} 
+              className={`nav-parent-btn ${isLabActive ? 'active-group' : ''}`}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <FlaskConical size={18} color={isLabActive ? 'var(--admin-accent)' : undefined} />
+                <span>Lab</span>
+              </span>
+              <ChevronDown 
+                size={16} 
+                style={{ 
+                  transform: labOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+                  transition: 'transform 0.2s ease',
+                  opacity: 0.7
+                }} 
+              />
+            </button>
 
-          <Link to="/admin/blog/categorias" className={`nav-item ${location.pathname.includes('/admin/blog/categorias') ? 'active' : ''}`}>
-            <List size={18} /> Categorias
-          </Link>
+            <AnimatePresence>
+              {labOpen && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="nav-submenu"
+                  style={{ overflow: 'hidden' }}
+                >
+                  <Link 
+                    to="/admin/blog" 
+                    className={`nav-sub-item ${
+                      location.pathname === '/admin/blog' || 
+                      location.pathname.includes('/admin/blog/new') || 
+                      location.pathname.includes('/admin/blog/edit') ? 'active' : ''
+                    }`}
+                  >
+                    <FileText size={15} /> Posts / Artigos
+                  </Link>
 
-          <Link to="/admin/blog/interacoes" className={`nav-item ${location.pathname.includes('/admin/blog/interacoes') ? 'active' : ''}`}>
-            <MessageSquare size={18} /> Moderação
-          </Link>
+                  <Link 
+                    to="/admin/blog/categorias" 
+                    className={`nav-sub-item ${location.pathname.includes('/admin/blog/categorias') ? 'active' : ''}`}
+                  >
+                    <List size={15} /> Categorias
+                  </Link>
 
-          <Link to="/admin/projetos" className={`nav-item ${location.pathname.startsWith('/admin/projetos') ? 'active' : ''}`}>
-            <FolderKanban size={18} /> Projetos
-          </Link>
+                  <Link 
+                    to="/admin/blog/interacoes" 
+                    className={`nav-sub-item ${location.pathname.includes('/admin/blog/interacoes') ? 'active' : ''}`}
+                  >
+                    <MessageSquare size={15} /> Moderação
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* GRUPO 2: PROJETOS */}
+          <div className="nav-group">
+            <button 
+              type="button" 
+              onClick={() => setProjectsOpen(!projectsOpen)} 
+              className={`nav-parent-btn ${isProjectsActive ? 'active-group' : ''}`}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <FolderKanban size={18} color={isProjectsActive ? 'var(--admin-accent)' : undefined} />
+                <span>Projetos</span>
+              </span>
+              <ChevronDown 
+                size={16} 
+                style={{ 
+                  transform: projectsOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+                  transition: 'transform 0.2s ease',
+                  opacity: 0.7
+                }} 
+              />
+            </button>
+
+            <AnimatePresence>
+              {projectsOpen && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="nav-submenu"
+                  style={{ overflow: 'hidden' }}
+                >
+                  <Link 
+                    to="/admin/projetos" 
+                    className={`nav-sub-item ${
+                      (location.pathname === '/admin/projetos' || 
+                       location.pathname.includes('/admin/projetos/novo') || 
+                       location.pathname.includes('/admin/projetos/editar')) &&
+                      !location.pathname.includes('/categorias') && 
+                      !location.pathname.includes('/tags') ? 'active' : ''
+                    }`}
+                  >
+                    <Layers size={15} /> Projetos
+                  </Link>
+
+                  <Link 
+                    to="/admin/projetos/categorias" 
+                    className={`nav-sub-item ${location.pathname.includes('/admin/projetos/categorias') ? 'active' : ''}`}
+                  >
+                    <List size={15} /> Categorias
+                  </Link>
+
+                  <Link 
+                    to="/admin/projetos/tags" 
+                    className={`nav-sub-item ${location.pathname.includes('/admin/projetos/tags') ? 'active' : ''}`}
+                  >
+                    <Tag size={15} /> Tags
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </nav>
 
         {/* User Card & Logout */}

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, type MouseEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
-import { Menu, X, ArrowRight, MessageSquare, LogIn, LogOut, User } from 'lucide-react';
+import { Menu, X, ArrowRight, MessageSquare, LogIn, LogOut, User, Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
+import { languages } from '../i18n';
 
 export default function Header() {
+  const { t, i18n } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -63,7 +66,7 @@ export default function Header() {
         await api.post('/users/google-login', { token: codeResponse.code });
         window.dispatchEvent(new Event('authChange'));
       } catch (error) {
-        alert('Falha ao autenticar.');
+        alert(t('nav.authFailed'));
       }
     },
     flow: 'auth-code',
@@ -106,28 +109,27 @@ export default function Header() {
           <ul className="nav-links">
             <li>
               <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')} className="hover-target">
-                SERVIÇOS
+                {t('nav.services')}
               </a>
             </li>
             <li>
               <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')} className="hover-target">
-                PORTFÓLIO
+                {t('nav.portfolio')}
               </a>
             </li>
             <li>
               <a href="/#diferenciais" onClick={(e) => handleScrollToSection(e, 'diferenciais')} className="hover-target">
-                DIFERENCIAIS
+                {t('nav.differentials')}
               </a>
             </li>
             <li>
               <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')} className="hover-target">
-                SOBRE
+                {t('nav.about')}
               </a>
             </li>
             <li>
               <Link to="/lab" className="hover-target lab-nav-link">
                 LAB
-                <span className="lab-badge">NOVO</span>
               </Link>
             </li>
           </ul>
@@ -139,21 +141,21 @@ export default function Header() {
             <div className="user-profile-pill">
               <img 
                 src={user.imagem || '/default-user-image.png'} 
-                alt="Perfil" 
+                alt={t('nav.profile')} 
                 referrerPolicy="no-referrer" 
                 className="user-avatar"
               />
               <div className="user-info-text">
                 <span className="user-name">{user.nome?.split(' ')[0]}</span>
                 <button onClick={handleLogout} className="logout-btn">
-                  Sair
+                  {t('nav.signOut')}
                 </button>
               </div>
             </div>
           ) : (
-            <button onClick={() => login()} className="header-login-btn hover-target" title="Fazer Login">
+            <button onClick={() => login()} className="header-login-btn hover-target" title={t('nav.signIn')}>
               <LogIn size={15} />
-              <span>Entrar</span>
+              <span>{t('nav.signIn')}</span>
             </button>
           )}
 
@@ -162,15 +164,22 @@ export default function Header() {
             onClick={(e) => handleScrollToSection(e, 'contato')} 
             className="btn btn-primary header-cta-btn hover-target"
           >
-            <span>Orçamento</span>
+            <span>{t('nav.budget')}</span>
             <ArrowRight size={14} />
           </a>
+
+          <label title={t('nav.language')} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+            <Languages size={15} />
+            <select aria-label={t('nav.language')} value={i18n.resolvedLanguage} onChange={(event) => i18n.changeLanguage(event.target.value)} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}>
+              {languages.map((language) => <option key={language.code} value={language.code} style={{ color: '#0f172a' }}>{language.label}</option>)}
+            </select>
+          </label>
 
           {/* Botão Menu Mobile */}
           <button 
             className="mobile-menu-btn hover-target" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? 'Fechar Menu' : 'Abrir Menu'}
+            aria-label={isMobileMenuOpen ? t('nav.menuClose') : t('nav.menuOpen')}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -182,41 +191,41 @@ export default function Header() {
       <div className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-nav-links">
           <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')}>
-            SERVIÇOS
+            {t('nav.services')}
           </a>
           <a href="/#portfolio" onClick={(e) => handleScrollToSection(e, 'portfolio')}>
-            PORTFÓLIO
+            {t('nav.portfolio')}
           </a>
           <a href="/#diferenciais" onClick={(e) => handleScrollToSection(e, 'diferenciais')}>
-            DIFERENCIAIS
+            {t('nav.differentials')}
           </a>
           <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')}>
-            SOBRE NÓS
+            {t('nav.about')}
           </a>
           <Link to="/lab" onClick={() => setIsMobileMenuOpen(false)}>
-            LAB <span className="lab-badge">NOVO</span>
+            LAB <span className="lab-badge">{t('nav.new')}</span>
           </Link>
           <a href="/#contato" onClick={(e) => handleScrollToSection(e, 'contato')} className="mobile-cta-link">
-            SOLICITAR ORÇAMENTO
+            {t('nav.budget')}
           </a>
         </div>
 
         <div className="mobile-user-area">
           {user ? (
             <div className="mobile-user-card">
-              <img src={user.imagem || '/default-user-image.png'} alt="Perfil" referrerPolicy="no-referrer" />
+              <img src={user.imagem || '/default-user-image.png'} alt={t('nav.profile')} referrerPolicy="no-referrer" />
               <div className="mobile-user-details">
                 <span className="mobile-user-name">{user.nome}</span>
                 <button onClick={handleLogout} className="mobile-logout-btn">
                   <LogOut size={14} />
-                  <span>Sair da conta</span>
+                  <span>{t('nav.signOutAccount')}</span>
                 </button>
               </div>
             </div>
           ) : (
             <button onClick={() => login()} className="btn btn-primary mobile-login-btn">
               <LogIn size={16} />
-              <span>Fazer Login com Google</span>
+              <span>{t('nav.signInGoogle')}</span>
             </button>
           )}
         </div>

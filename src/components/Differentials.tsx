@@ -1,34 +1,24 @@
 import { motion } from 'motion/react';
 import { Zap, ShieldCheck, Target, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const differentials = [
   {
     icon: Zap,
-    title: 'Performance & Velocidade',
-    description: 'Aplicações ultra-rápidas desenvolvidas com tecnologias modernas, otimizadas para carregamento instantâneo e máxima retenção.',
-    badge: 'Máxima Eficiência'
   },
   {
     icon: Target,
-    title: 'Design Focado em Conversão',
-    description: 'Interfaces intuitivas e elegantes criadas para encantar usuários, guiar a navegação e transformar visitantes em clientes.',
-    badge: 'UX / UI Estratégico'
   },
   {
     icon: ShieldCheck,
-    title: 'Arquitetura Robusta & Segura',
-    description: 'Sistemas estruturados para crescer com o seu negócio, garantindo segurança de dados, alta disponibilidade e código limpo.',
-    badge: 'Pronto para Escalar'
   },
   {
     icon: RefreshCw,
-    title: 'Suporte & Evolução Contínua',
-    description: 'Acompanhamento próximo em todas as etapas, desde a concepção e lançamento até novas funcionalidades e melhorias contínuas.',
-    badge: 'Parceria Estratégica'
   }
 ];
 
 export default function Differentials() {
+  const { t } = useTranslation();
   return (
     <section className="section differentials-section" id="diferenciais">
       <div className="container">
@@ -39,7 +29,7 @@ export default function Differentials() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            POR QUE A KINETIC SOLUTIONS
+            {t('differentials.badge')}
           </motion.span>
           <motion.h2 
             className="section-title"
@@ -48,7 +38,7 @@ export default function Differentials() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            Engenharia Digital Que <span>Gera Resultados</span>
+            {t('differentials.title')} <span>{t('differentials.titleAccent')}</span>
           </motion.h2>
           <motion.p
             className="section-subtitle"
@@ -57,7 +47,7 @@ export default function Differentials() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Combinamos precisão técnica, design moderno e estratégia de negócios para construir plataformas que impulsionam empresas.
+            {t('differentials.subtitle')}
           </motion.p>
         </div>
 
@@ -66,7 +56,7 @@ export default function Differentials() {
             const Icon = item.icon;
             return (
               <motion.div
-                key={item.title}
+                key={index}
                 className="differential-card glass-panel"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -78,10 +68,10 @@ export default function Differentials() {
                   <div className="differential-icon-box">
                     <Icon size={22} className="differential-icon" />
                   </div>
-                  <span className="differential-badge">{item.badge}</span>
+                  <span className="differential-badge">{t(`differentials.items.${index}.badge`)}</span>
                 </div>
-                <h3 className="differential-title">{item.title}</h3>
-                <p className="differential-desc">{item.description}</p>
+                <h3 className="differential-title">{t(`differentials.items.${index}.title`)}</h3>
+                <p className="differential-desc">{t(`differentials.items.${index}.description`)}</p>
               </motion.div>
             );
           })}
@@ -97,22 +87,22 @@ export default function Differentials() {
         >
           <div className="metric-item">
             <span className="metric-number">+17</span>
-            <span className="metric-label">Projetos & Sistemas</span>
+            <span className="metric-label">{t('differentials.metrics.0')}</span>
           </div>
           <div className="metric-divider"></div>
           <div className="metric-item">
             <span className="metric-number">99.9%</span>
-            <span className="metric-label">Uptime & Estabilidade</span>
+            <span className="metric-label">{t('differentials.metrics.1')}</span>
           </div>
           <div className="metric-divider"></div>
           <div className="metric-item">
             <span className="metric-number">100%</span>
-            <span className="metric-label">Soluções Sob Medida</span>
+            <span className="metric-label">{t('differentials.metrics.2')}</span>
           </div>
           <div className="metric-divider"></div>
           <div className="metric-item">
-            <span className="metric-number">Ágil</span>
-            <span className="metric-label">Entregas Contínuas</span>
+            <span className="metric-number">{t('differentials.agile')}</span>
+            <span className="metric-label">{t('differentials.metrics.3')}</span>
           </div>
         </motion.div>
       </div>

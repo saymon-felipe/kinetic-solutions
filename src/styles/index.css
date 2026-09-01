@@ -287,6 +287,10 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
 }
 
+li {
+  position: relative;
+}
+
 .lab-nav-link {
   display: inline-flex;
   align-items: center;
@@ -301,6 +305,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2px 6px;
   border-radius: 9999px;
   letter-spacing: 0.5px;
+  position: absolute;
+  left: 110%;
 }
 
 .header-actions {
