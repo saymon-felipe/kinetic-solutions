@@ -108,12 +108,19 @@ export default function AdminProjectsDashboard() {
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id || reordering) return;
 
-    const fromIndex = projects.findIndex((project) => project.id === Number(active.id));
-    const toIndex = projects.findIndex((project) => project.id === Number(over.id));
+    const fromIndex = filteredProjects.findIndex((project) => project.id === Number(active.id));
+    const toIndex = filteredProjects.findIndex((project) => project.id === Number(over.id));
     if (fromIndex < 0 || toIndex < 0) return;
 
     const previousProjects = projects;
-    const reorderedProjects = arrayMove(projects, fromIndex, toIndex);
+    const reorderedVisibleProjects = arrayMove(filteredProjects, fromIndex, toIndex);
+    let visibleIndex = 0;
+    const reorderedProjects = projects.map((project) => {
+      const belongsToCurrentFilter = statusFilter === 'all'
+        || (statusFilter === 'active' ? project.published : !project.published);
+
+      return belongsToCurrentFilter ? reorderedVisibleProjects[visibleIndex++] : project;
+    });
     setProjects(reorderedProjects);
     setReordering(true);
 
@@ -155,7 +162,7 @@ export default function AdminProjectsDashboard() {
                 <thead><tr><th style={{ width: '42px', paddingLeft: '18px' }} aria-label="Reordenar" /><th>Projeto</th><th>Categoria</th><th>Status</th><th style={{ textAlign: 'right', paddingRight: '24px' }}>Ações</th></tr></thead>
                 <SortableContext items={filteredProjects.map((project) => project.id)} strategy={verticalListSortingStrategy}>
                   <tbody>
-                    {filteredProjects.map((project) => <SortableProjectRow key={project.id} project={project} dragDisabled={Boolean(search) || statusFilter !== 'all' || reordering} onEdit={() => navigate(`/admin/projetos/editar/${project.id}`)} onDelete={() => handleDelete(project)} />)}
+                    {filteredProjects.map((project) => <SortableProjectRow key={project.id} project={project} dragDisabled={Boolean(search) || reordering} onEdit={() => navigate(`/admin/projetos/editar/${project.id}`)} onDelete={() => handleDelete(project)} />)}
                     {filteredProjects.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', padding: '64px 24px', color: 'var(--admin-text-muted)' }}><FolderKanban size={42} style={{ opacity: 0.45, marginBottom: '12px' }} /><p>Nenhum projeto encontrado.</p></td></tr>}
                   </tbody>
                 </SortableContext>

@@ -42,6 +42,7 @@ export default function AdminProjectForm() {
   const [project, setProject] = useState<ProjectForm>(emptyProject);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [generatingDescriptions, setGeneratingDescriptions] = useState(false);
   const [loading, setLoading] = useState(editing);
   const [activeLang, setActiveLang] = useState<'pt' | 'en' | 'es'>('pt');
   const [tagInput, setTagInput] = useState('');
@@ -120,6 +121,35 @@ export default function AdminProjectForm() {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       handleAddTag(tagInput);
+    }
+  };
+
+  const handleGenerateDescriptions = async () => {
+    if (!project.title.trim() || !project.category.trim()) {
+      alert('Preencha o título e a categoria antes de gerar as descrições.');
+      return;
+    }
+
+    setGeneratingDescriptions(true);
+    try {
+      const response = await api.post('/projects/generate-descriptions', {
+        title: project.title,
+        category: project.category,
+        tags: parsedTags,
+        description: project.description
+      });
+      const generated = response.data.returnObj || response.data;
+      setProject((current) => ({
+        ...current,
+        description: generated.description || current.description,
+        descriptionEn: generated.descriptionEn || current.descriptionEn,
+        descriptionEs: generated.descriptionEs || current.descriptionEs
+      }));
+      setActiveLang('pt');
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Não foi possível gerar as descrições com IA.');
+    } finally {
+      setGeneratingDescriptions(false);
     }
   };
 
@@ -302,14 +332,29 @@ export default function AdminProjectForm() {
 
           {/* CARD: DESCRIÇÃO MULTILÍNGUE (i18n) */}
           <div className="admin-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '12px', flexWrap: 'wrap' }}>
               <h3 style={{ fontSize: '1rem', color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Globe size={18} color="var(--admin-accent)" /> Descrição do Projeto
               </h3>
-              <span style={{ fontSize: '0.74rem', color: 'var(--admin-text-dim)' }}>
-                {activeLang === 'pt' ? 'Obrigatório' : 'Opcional (fallback em PT)'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '0.74rem', color: 'var(--admin-text-dim)' }}>
+                  {activeLang === 'pt' ? 'Obrigatório' : 'Opcional (fallback em PT)'}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleGenerateDescriptions}
+                  disabled={generatingDescriptions}
+                  className="btn"
+                  title="Gera e preenche as descrições em português, inglês e espanhol"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '8px 12px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.38)', color: '#fbbf24', fontSize: '0.76rem', whiteSpace: 'nowrap', opacity: generatingDescriptions ? 0.7 : 1 }}
+                >
+                  <Sparkles size={14} /> {generatingDescriptions ? 'Gerando...' : 'Gerar com IA'}
+                </button>
+              </div>
             </div>
+            <p style={{ color: 'var(--admin-text-dim)', fontSize: '0.74rem', lineHeight: 1.45, margin: '-4px 0 16px' }}>
+              A IA usa título, categoria e tags para criar as três versões padronizadas. Revise o conteúdo antes de salvar.
+            </p>
 
             {/* ABAS DE IDIOMA */}
             <div className="lang-tab-bar">
