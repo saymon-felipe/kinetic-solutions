@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -29,6 +29,7 @@ import AdminProjectCategories from './pages/admin/AdminProjectCategories';
 import AdminProjectTags from './pages/admin/AdminProjectTags';
 
 //TODO: Modularizar as funções de Analytics em hooks separados.
+const SCROLL_POSITION_KEY_PREFIX = 'ksi_scroll_position:';
 
 function AnalyticsTracker() {
   const location = useLocation();
@@ -68,6 +69,87 @@ function AnalyticsTracker() {
     }).catch(err => console.error(err));
     
   }, [location.pathname, location.search]);
+
+  return null;
+}
+
+function PageScrollPersistence() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useEffect(() => {
+    const storageKey = `${SCROLL_POSITION_KEY_PREFIX}${location.pathname}`;
+    const savedValue = sessionStorage.getItem(storageKey);
+    const savedPosition = savedValue === null ? null : Number(savedValue);
+    const hasSavedPosition = savedPosition !== null && Number.isFinite(savedPosition) && savedPosition >= 0;
+    const targetPosition = savedPosition ?? 0;
+    let restored = false;
+    let animationFrame: number | null = null;
+    let restoreTimer: number | null = null;
+    let restoreAttempts = 0;
+
+    const persistScrollPosition = () => {
+      if (restored) {
+        sessionStorage.setItem(storageKey, String(Math.round(window.scrollY)));
+      }
+    };
+
+    const restoreScrollPosition = () => {
+      if (window.location.hash) {
+        restored = true;
+        return;
+      }
+
+      if (!hasSavedPosition) {
+        window.scrollTo(0, 0);
+        restored = true;
+        return;
+      }
+
+      window.scrollTo(0, targetPosition);
+      restoreAttempts += 1;
+
+      if (restoreAttempts >= 3 && Math.abs(window.scrollY - targetPosition) < 1) {
+        restored = true;
+        return;
+      }
+
+      if (restoreAttempts < 20) {
+        restoreTimer = window.setTimeout(restoreScrollPosition, 100);
+      } else {
+        restored = true;
+      }
+    };
+
+    const handleScroll = () => {
+      if (animationFrame === null) {
+        animationFrame = requestAnimationFrame(() => {
+          persistScrollPosition();
+          animationFrame = null;
+        });
+      }
+    };
+
+    const restoreFrame = requestAnimationFrame(restoreScrollPosition);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('pagehide', persistScrollPosition);
+
+    return () => {
+      cancelAnimationFrame(restoreFrame);
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      if (restoreTimer !== null) window.clearTimeout(restoreTimer);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('pagehide', persistScrollPosition);
+    };
+  }, [location.hash, location.pathname]);
 
   return null;
 }
@@ -118,17 +200,30 @@ function App() {
     <div style={{ minHeight: '100dvh' }}>
       <CustomCursor />
       <AnalyticsTracker />
+      <PageScrollPersistence />
       <ScrollToHash />
       
       <Routes>
-        <Route path="/*" element={
+        <Route path="/" element={
           <>
             <Header />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/lab" element={<LabHome />} />
-              <Route path="/lab/:slug" element={<LabPost />} />
-            </Routes>
+            <HomePage />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/lab" element={
+          <>
+            <Header />
+            <LabHome />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/lab/:slug" element={
+          <>
+            <Header />
+            <LabPost />
             <Footer />
           </>
         } />
@@ -148,6 +243,8 @@ function App() {
           <Route path="projetos/categorias" element={<AdminProjectCategories />} />
           <Route path="projetos/tags" element={<AdminProjectTags />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

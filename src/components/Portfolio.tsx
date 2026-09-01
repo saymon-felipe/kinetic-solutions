@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
-import { ChevronLeft, ChevronRight, ExternalLink, Maximize2, Layers } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Maximize2, Layers, X } from 'lucide-react';
 import api from '../services/api';
 import KsiLoader from './KsiLoader';
 import { useTranslation } from 'react-i18next';
@@ -133,7 +133,32 @@ export default function Portfolio() {
           </div>
         )}
 
-        <PhotoProvider maskOpacity={0.88} bannerVisible={false} speed={() => 300}>
+        <PhotoProvider 
+          maskOpacity={0.92} 
+          bannerVisible={false} 
+          speed={() => 280}
+          maskClosable={true}
+          pullClosable={true}
+          overlayRender={({ onClose, index, images }) => (
+            <div className="portfolio-lightbox-overlay">
+              <button 
+                type="button" 
+                onClick={onClose} 
+                className="portfolio-lightbox-close-btn"
+                aria-label={t('common.close') || 'Fechar'}
+                title="Fechar (Esc)"
+              >
+                <X size={22} />
+              </button>
+
+              {images.length > 1 && (
+                <div className="portfolio-lightbox-hint">
+                  <span>{String(index + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}</span>
+                </div>
+              )}
+            </div>
+          )}
+        >
           <div className="portfolio-carousel" ref={carouselRef} data-lenis-prevent="true" tabIndex={0} onKeyDown={(event) => {
             if (event.key === 'ArrowLeft') scroll('left');
             if (event.key === 'ArrowRight') scroll('right');
@@ -163,8 +188,23 @@ export default function Portfolio() {
                         <p className="portfolio-desc">{localizedDescription}</p>
                         <div className="portfolio-tags">{project.tags.map((tag) => <span key={tag} className="tech-tag">{tag}</span>)}</div>
                         <div className="portfolio-card-actions">
-                          <PhotoView src={project.image}><button className="card-btn card-btn-secondary" title={t('portfolio.zoomImage')}><Maximize2 size={15} /><span>{t('portfolio.details')}</span></button></PhotoView>
-                          {hasValidLink && <a href={project.link!} target="_blank" rel="noopener noreferrer" className="card-btn card-btn-primary" title={t('portfolio.visitTitle')}><span>{t('portfolio.visit')}</span><ExternalLink size={14} /></a>}
+                          <button 
+                            type="button"
+                            onClick={(e) => {
+                              e.currentTarget.closest('.portfolio-card')?.querySelector<HTMLElement>('.portfolio-image-container')?.click();
+                            }}
+                            className="card-btn card-btn-secondary" 
+                            title={t('portfolio.zoomImage')}
+                          >
+                            <Maximize2 size={15} />
+                            <span>{t('portfolio.details')}</span>
+                          </button>
+                          {hasValidLink && (
+                            <a href={project.link!} target="_blank" rel="noopener noreferrer" className="card-btn card-btn-primary" title={t('portfolio.visitTitle')}>
+                              <span>{t('portfolio.visit')}</span>
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>

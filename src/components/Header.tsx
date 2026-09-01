@@ -54,7 +54,7 @@ export default function Header() {
           behavior: "smooth"
         });
         
-        window.history.pushState(null, '', `/#${id}`);
+        window.history.replaceState(null, '', `${location.pathname}${location.search}`);
       }
     }
     setIsMobileMenuOpen(false);

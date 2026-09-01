@@ -27,11 +27,23 @@ export default function useAdvancedAnalytics() {
     };
 
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'BODY' || target.tagName === 'HTML') return;
-      
-      const identifier = target.tagName + (target.id ? `#${target.id}` : '') + (target.className ? `.${target.className.split(' ')[0]}` : '');
-      clickData.current[identifier] = (clickData.current[identifier] || 0) + 1;
+      try {
+        const target = e.target as Element | null;
+        if (!target || target.tagName === 'BODY' || target.tagName === 'HTML') return;
+        
+        let classNameStr = '';
+        if (typeof target.className === 'string') {
+          classNameStr = target.className;
+        } else if (typeof target.className === 'object' && target.className && 'baseVal' in target.className) {
+          classNameStr = String((target.className as SVGAnimatedString).baseVal || '');
+        }
+        
+        const firstClass = classNameStr ? classNameStr.trim().split(/\s+/)[0] : '';
+        const identifier = target.tagName + (target.id ? `#${target.id}` : '') + (firstClass ? `.${firstClass}` : '');
+        clickData.current[identifier] = (clickData.current[identifier] || 0) + 1;
+      } catch (_) {
+        // Ignora silenciosamente para nunca quebrar a interface
+      }
     };
 
     const handleMouseMove = (e: MouseEvent) => {
