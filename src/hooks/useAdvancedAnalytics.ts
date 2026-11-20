@@ -28,8 +28,9 @@ export default function useAdvancedAnalytics() {
 
     const handleClick = (e: MouseEvent) => {
       try {
-        const target = e.target as Element | null;
-        if (!target || target.tagName === 'BODY' || target.tagName === 'HTML') return;
+        const clickedElement = e.target as Element | null;
+        if (!clickedElement || clickedElement.tagName === 'BODY' || clickedElement.tagName === 'HTML') return;
+        const target = clickedElement.closest('[data-tech-cta]') || clickedElement;
         
         let classNameStr = '';
         if (typeof target.className === 'string') {

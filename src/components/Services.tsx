@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { Globe, Smartphone, Server, Sparkles, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 const services = [
   {
@@ -116,6 +117,10 @@ export default function Services() {
               </motion.div>
             );
           })}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <Link to="/tech" className="btn btn-secondary hover-target">KSI TECH <ArrowUpRight size={16} /></Link>
         </div>
 
       </div>

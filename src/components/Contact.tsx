@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Send, CheckCircle2, AlertCircle, MessageCircle, Mail, Phone, Clock, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
+import { whatsappNumber } from '../utils/whatsapp';
 
 export default function Contact() {
   const { t, i18n } = useTranslation();
@@ -53,7 +54,7 @@ export default function Contact() {
   const whatsappMessage = encodeURIComponent(
     `${t('contact.whatsappMessage')}${formData.requestType ? ` ${formData.requestType}.` : ''}`
   );
-  const whatsappUrl = `https://wa.me/5511978250274?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <section className="section contact-section" id="contato">

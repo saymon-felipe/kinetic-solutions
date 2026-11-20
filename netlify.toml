@@ -1,3 +1,7 @@
 [[edge_functions]]
   function = "og-tags"
   path = "/lab/*"
+
+[[edge_functions]]
+  function = "tech-og-tags"
+  path = "/tech"

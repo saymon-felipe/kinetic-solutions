@@ -5,6 +5,7 @@ import { Menu, X, ArrowRight, MessageSquare, LogIn, LogOut, User, Languages } fr
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { languages } from '../i18n';
+import { techWhatsappUrl } from '../utils/whatsapp';
 
 export default function Header() {
   const { t, i18n } = useTranslation();
@@ -128,6 +129,9 @@ export default function Header() {
               </a>
             </li>
             <li>
+              <Link to="/tech" className="hover-target">KSI TECH</Link>
+            </li>
+            <li>
               <Link to="/lab" className="hover-target lab-nav-link">
                 LAB
               </Link>
@@ -160,8 +164,8 @@ export default function Header() {
           )}
 
           <a 
-            href="/#contato" 
-            onClick={(e) => handleScrollToSection(e, 'contato')} 
+            href={location.pathname === '/tech' ? techWhatsappUrl : '/#contato'}
+            onClick={location.pathname === '/tech' ? undefined : (e) => handleScrollToSection(e, 'contato')}
             className="btn btn-primary header-cta-btn hover-target"
           >
             <span>{t('nav.budget')}</span>
@@ -180,6 +184,8 @@ export default function Header() {
             className="mobile-menu-btn hover-target" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? t('nav.menuClose') : t('nav.menuOpen')}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -188,7 +194,7 @@ export default function Header() {
       </div>
 
       {/* Menu Mobile Drawer */}
-      <div className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`}>
+      <div id="mobile-navigation" className={`mobile-nav-dropdown ${isMobileMenuOpen ? 'open' : ''}`} inert={!isMobileMenuOpen}>
         <div className="mobile-nav-links">
           <a href="/#servicos" onClick={(e) => handleScrollToSection(e, 'servicos')}>
             {t('nav.services')}
@@ -202,10 +208,11 @@ export default function Header() {
           <a href="/#sobre" onClick={(e) => handleScrollToSection(e, 'sobre')}>
             {t('nav.about')}
           </a>
+          <Link to="/tech" onClick={() => setIsMobileMenuOpen(false)}>KSI TECH</Link>
           <Link to="/lab" onClick={() => setIsMobileMenuOpen(false)}>
             LAB <span className="lab-badge">{t('nav.new')}</span>
           </Link>
-          <a href="/#contato" onClick={(e) => handleScrollToSection(e, 'contato')} className="mobile-cta-link">
+          <a href={location.pathname === '/tech' ? techWhatsappUrl : '/#contato'} onClick={location.pathname === '/tech' ? () => setIsMobileMenuOpen(false) : (e) => handleScrollToSection(e, 'contato')} className="mobile-cta-link">
             {t('nav.budget')}
           </a>
         </div>

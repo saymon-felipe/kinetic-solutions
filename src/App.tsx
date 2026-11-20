@@ -15,6 +15,8 @@ import useAdvancedAnalytics from './hooks/useAdvancedAnalytics';
 
 import LabHome from './pages/LabHome';
 import LabPost from './pages/LabPost';
+import Tech from './pages/Tech';
+import { PrivacyPolicy, TermsOfUse } from './pages/Legal';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -211,6 +213,10 @@ function App() {
             <Footer />
           </>
         } />
+
+        <Route path="/tech" element={<><Header /><Tech /><Footer /></>} />
+        <Route path="/privacidade" element={<><Header /><PrivacyPolicy /><Footer /></>} />
+        <Route path="/termos" element={<><Header /><TermsOfUse /><Footer /></>} />
 
         <Route path="/lab" element={
           <>
