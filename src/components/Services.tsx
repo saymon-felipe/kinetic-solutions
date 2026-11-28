@@ -119,7 +119,7 @@ export default function Services() {
           })}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+        <div style={{ textAlign: 'center', marginTop: '2rem', display: 'none' }}>
           <Link to="/tech" className="btn btn-secondary hover-target">KSI TECH <ArrowUpRight size={16} /></Link>
         </div>
 
