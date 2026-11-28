@@ -128,7 +128,7 @@ export default function Header() {
                 {t('nav.about')}
               </a>
             </li>
-            <li>
+            <li style={{ display: 'none' }}>
               <Link to="/tech" className="hover-target">KSI TECH</Link>
             </li>
             <li>
